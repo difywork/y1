@@ -1,0 +1,3814 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VŠ efektivně – v202 orbit diagram top-bottom arrows fixed</title>
+  <style>
+    :root {
+      --text: #07111f;
+      --muted: #4a5d76;
+      --blue: #3468f6;
+      --violet: #765eff;
+      --panel: rgba(255,255,255,.78);
+      --line: rgba(82, 104, 160, .12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(87, 132, 255, .08), transparent 26%),
+        radial-gradient(circle at 88% 4%, rgba(142, 112, 255, .13), transparent 28%),
+        linear-gradient(180deg, #fbfcff 0%, #f5f8fe 58%, #eef5fd 100%);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      opacity: .50;
+      background:
+        linear-gradient(rgba(73, 104, 180, .032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(73, 104, 180, .026) 1px, transparent 1px),
+        linear-gradient(135deg, transparent 0 58%, rgba(137, 118, 255, .052) 58% 100%);
+      background-size: 44px 44px, 44px 44px, 100% 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .wrap {
+      width: min(1480px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .header-shell {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      padding: 18px 0 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.62));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .header {
+      min-height: 84px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 32px;
+      padding: 0 24px;
+      border: 1px solid rgba(19, 38, 78, .08);
+      border-radius: 24px;
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 20px 50px rgba(19, 38, 78, .05), inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 286px;
+    }
+
+    .brand img {
+      display: block;
+      width: 238px;
+      height: auto;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(24px, 2.3vw, 42px);
+    }
+
+    .nav a {
+      position: relative;
+      padding: 12px 0;
+      color: #2f3e57;
+      font-size: .98rem;
+      font-weight: 650;
+      letter-spacing: -.014em;
+    }
+
+    .nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 4px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue), var(--violet));
+      opacity: 0;
+      transform: scaleX(.6);
+      transition: .18s ease;
+    }
+
+    .nav a:hover::after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    .header-cta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-btn {
+      min-width: 206px;
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 0 24px;
+      border-radius: 17px;
+      border: 1px solid rgba(37, 58, 108, .10);
+      background: rgba(255,255,255,.82);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.92), 0 8px 24px rgba(15, 23, 42, .04);
+      color: #121d31;
+      font-weight: 740;
+    }
+
+    .header-btn.primary {
+      color: #fff;
+      border-color: rgba(255,255,255,.18);
+      background: linear-gradient(90deg, #5028e6 0%, #6540f1 55%, #8d7bff 100%);
+      box-shadow: 0 16px 36px rgba(92, 67, 240, .22), inset 0 1px 0 rgba(255,255,255,.24);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(34px, 3.5vw, 54px) 0 clamp(70px, 6vw, 96px);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(620px, .98fr) minmax(590px, 1.02fr);
+      align-items: center;
+      gap: clamp(38px, 4vw, 64px);
+    }
+
+    .copy {
+      max-width: 735px;
+    }
+
+    .badge {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(58, 89, 210, .12);
+      background: rgba(255,255,255,.76);
+      box-shadow: 0 10px 24px rgba(58, 89, 210, .06), inset 0 1px 0 rgba(255,255,255,.88);
+      color: #2855da;
+      font-size: .96rem;
+      font-weight: 720;
+    }
+
+    .heading {
+      margin: 28px 0 0;
+      max-width: 720px;
+      color: #081326;
+      font-size: clamp(2.82rem, 3.52vw, 4.18rem);
+      line-height: 1.02;
+      letter-spacing: -.043em;
+      font-weight: 635;
+      text-wrap: balance;
+    }
+
+    .heading .gradient {
+      font-weight: 720;
+      background: linear-gradient(92deg, #3468f6 0%, #5d63ff 48%, #765eff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lead {
+      max-width: 660px;
+      margin: 21px 0 0;
+      color: var(--muted);
+      font-size: 1.005rem;
+      line-height: 1.54;
+      letter-spacing: -.012em;
+    }
+
+    .chips {
+      max-width: 735px;
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 9px;
+    }
+
+    .break {
+      flex-basis: 100%;
+      height: 0;
+    }
+
+    .chip {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 13px 0 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(108, 126, 166, .17);
+      background: rgba(255,255,255,.74);
+      box-shadow: 0 6px 18px rgba(15,23,42,.03), inset 0 1px 0 rgba(255,255,255,.88);
+      color: #2e3d57;
+      font-size: .815rem;
+      font-weight: 690;
+      white-space: nowrap;
+    }
+
+    .chip i {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 18px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(245,247,255,.96));
+      box-shadow: inset 0 0 0 1px rgba(103, 92, 255, .18), 0 2px 6px rgba(103,92,255,.10);
+      color: #675cff;
+      font-style: normal;
+      font-weight: 800;
+      overflow: hidden;
+    }
+
+    .chip i svg {
+      width: 11px;
+      height: 11px;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chip i svg.fill {
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .cta-row {
+      margin-top: 25px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hero-btn {
+      min-width: 248px;
+      min-height: 56px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 0 28px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: linear-gradient(90deg, #4b23de 0%, #6038ef 54%, #7a69ff 100%);
+      box-shadow: 0 18px 44px rgba(90, 68, 238, .26), inset 0 1px 0 rgba(255,255,255,.22);
+      color: #fff;
+      font-size: 1.02rem;
+      font-weight: 735;
+    }
+
+    .proofbar {
+      width: min(940px, 100%);
+      margin-top: 34px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 11px 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(87, 104, 145, .10);
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 14px 34px rgba(15,23,42,.05), inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .proof {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .proof-ico {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(243,246,255,.96));
+      box-shadow: inset 0 0 0 1px rgba(78,99,241,.14), 0 6px 14px rgba(78,99,241,.08);
+      color: #4e63f1;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .proof b {
+      display: block;
+      color: #2a3950;
+      font-size: .81rem;
+      font-weight: 790;
+      line-height: 1.1;
+    }
+
+    .proof small {
+      display: block;
+      margin-top: 3px;
+      color: #6d7b92;
+      font-size: .74rem;
+      font-weight: 620;
+      line-height: 1.1;
+    }
+
+    .visual-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-visual {
+      position: relative;
+      width: min(760px, 100%);
+      padding-bottom: 46px;
+    }
+
+    .hero-image-shell {
+      width: 100%;
+      padding: 10px;
+      border-radius: 34px;
+      border: 1px solid rgba(255,255,255,.74);
+      background: rgba(255,255,255,.58);
+      box-shadow: 0 18px 42px rgba(84, 96, 176, .10), inset 0 1px 0 rgba(255,255,255,.88);
+    }
+
+    .hero-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 26px;
+    }
+
+    .hero-proof-strip {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(620px, calc(100% - 112px));
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding: 15px 22px;
+      border-radius: 22px;
+      border: 1px solid rgba(135,145,199,.16);
+      background: rgba(255,255,255,.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 14px 30px rgba(108, 116, 172, .12), inset 0 1px 0 rgba(255,255,255,.94);
+    }
+
+    .hero-proof-item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 12px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .hero-proof-icon {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(242,245,255,.95));
+      box-shadow: inset 0 0 0 1px rgba(106,88,255,.16), 0 4px 10px rgba(106,88,255,.10);
+      color: #6a58ff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .hero-proof-item b {
+      display: block;
+      color: #33425d;
+      font-size: .82rem;
+      line-height: 1.08;
+      font-weight: 760;
+    }
+
+    .hero-proof-item small {
+      display: block;
+      margin-top: 4px;
+      color: #708097;
+      font-size: .74rem;
+      line-height: 1.08;
+      font-weight: 620;
+    }
+
+    @media (max-width: 1200px) {
+      .header {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 18px 22px;
+      }
+
+      .brand,
+      .nav,
+      .header-cta {
+        justify-content: center;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .copy {
+        max-width: 760px;
+      }
+
+      .heading {
+        max-width: 740px;
+      }
+
+      .hero-visual {
+        width: min(700px, 100%);
+      }
+
+      .proofbar {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .wrap {
+        width: min(100% - 28px, 760px);
+      }
+
+      .nav {
+        flex-wrap: wrap;
+        gap: 14px 20px;
+      }
+
+      .header-btn,
+      .hero-btn {
+        width: 100%;
+        min-width: auto;
+      }
+
+      .header-cta,
+      .cta-row {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      .heading {
+        max-width: 100%;
+        font-size: clamp(2.36rem, 8.8vw, 3.55rem);
+        line-height: 1.01;
+        font-weight: 650;
+      }
+
+      .lead {
+        font-size: .96rem;
+      }
+
+      .hero-visual {
+        padding-bottom: 0;
+      }
+
+      .hero-image-shell {
+        padding: 8px;
+        border-radius: 26px;
+      }
+
+      .hero-image {
+        border-radius: 20px;
+      }
+
+      .hero-proof-strip {
+        position: static;
+        transform: none;
+        width: 100%;
+        margin-top: 14px;
+        grid-template-columns: 1fr;
+        padding: 14px 16px;
+      }
+
+      .proofbar {
+        grid-template-columns: 1fr;
+      }
+    }
+  
+    /* v131: original unframed illustration + precise premium CSS frame */
+    .hero {
+      padding-top: clamp(34px, 3.4vw, 52px);
+      padding-bottom: clamp(76px, 6.2vw, 110px);
+    }
+
+    .hero-grid {
+      grid-template-columns: minmax(600px, .94fr) minmax(720px, 1.06fr);
+      align-items: center;
+      gap: clamp(36px, 3.7vw, 60px);
+    }
+
+    .visual-col {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: auto !important;
+      padding-top: 0 !important;
+      overflow: visible !important;
+    }
+
+    .hero-visual {
+      position: relative !important;
+      width: min(850px, 100%) !important;
+      padding: 14px 14px 72px !important;
+      border-radius: 42px !important;
+      isolation: isolate;
+      overflow: visible !important;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      inset: -8px -10px 24px -10px;
+      z-index: -2;
+      border-radius: 48px;
+      background:
+        radial-gradient(circle at 84% 18%, rgba(158,131,255,.18), transparent 34%),
+        radial-gradient(circle at 16% 18%, rgba(120,155,255,.10), transparent 28%),
+        linear-gradient(135deg, rgba(255,255,255,.34), rgba(241,245,255,.12) 52%, rgba(233,227,255,.18));
+      filter: blur(10px);
+      opacity: .95;
+      pointer-events: none;
+    }
+
+    .hero-visual::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      z-index: -1;
+      border-radius: inherit;
+      pointer-events: none;
+      background:
+        linear-gradient(132deg, rgba(255,255,255,.16) 0 16%, transparent 16% 100%),
+        linear-gradient(132deg, transparent 0 68%, rgba(156,132,255,.045) 68% 100%);
+      opacity: .72;
+    }
+
+    .hero-image-shell {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10.15;
+      padding: 8px !important;
+      border-radius: 34px !important;
+      border: 1px solid rgba(255,255,255,.42) !important;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.50), rgba(255,255,255,.28));
+      box-shadow:
+        0 18px 42px rgba(82,94,176,.09),
+        0 4px 12px rgba(15,23,42,.02),
+        inset 0 1px 0 rgba(255,255,255,.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      overflow: hidden !important;
+    }
+
+    .hero-image-shell::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      z-index: 2;
+      border-radius: 27px;
+      pointer-events: none;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.18),
+        inset 0 20px 30px rgba(255,255,255,.06),
+        inset 0 -16px 24px rgba(103,98,190,.03);
+    }
+
+    .hero-image-shell::after {
+      content: "";
+      position: absolute;
+      inset: -18px;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, transparent 70%, rgba(244,247,255,.52) 100%);
+      opacity: .55;
+    }
+
+    .hero-image {
+      position: relative;
+      z-index: 0;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      object-position: center 52% !important;
+      border-radius: 27px !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    .hero-proof-strip {
+      position: absolute !important;
+      left: 50% !important;
+      bottom: 10px !important;
+      transform: translateX(-50%) !important;
+      width: min(648px, calc(100% - 136px)) !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 0 !important;
+      padding: 16px 22px !important;
+      border-radius: 26px !important;
+      border: 1px solid rgba(128,139,199,.16) !important;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.91), rgba(255,255,255,.78));
+      backdrop-filter: blur(18px) saturate(1.05) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(1.05) !important;
+      box-shadow:
+        0 18px 38px rgba(87, 95, 164, .14),
+        0 4px 12px rgba(15,23,42,.025),
+        inset 0 1px 0 rgba(255,255,255,.96) !important;
+      z-index: 5 !important;
+      overflow: hidden;
+    }
+
+    .hero-proof-item {
+      display: grid !important;
+      grid-template-columns: 30px 1fr !important;
+      column-gap: 12px !important;
+      align-items: center !important;
+      min-width: 0;
+      padding: 0 18px;
+      position: relative;
+    }
+
+    .hero-proof-item:first-child {
+      padding-left: 0;
+    }
+
+    .hero-proof-item:last-child {
+      padding-right: 0;
+    }
+
+    .hero-proof-item + .hero-proof-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 1px;
+      background: linear-gradient(180deg, transparent, rgba(105,117,175,.18), transparent);
+    }
+
+    .hero-proof-icon {
+      width: 30px !important;
+      height: 30px !important;
+      display: grid !important;
+      place-items: center !important;
+      border-radius: 999px !important;
+      color: #6555ff !important;
+      font-size: 13px !important;
+      font-weight: 800 !important;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(242,245,255,.95));
+      box-shadow:
+        inset 0 0 0 1px rgba(106,88,255,.16),
+        0 4px 10px rgba(106,88,255,.10);
+    }
+
+    .hero-proof-item b {
+      display: block;
+      color: #2f3d58;
+      font-size: .84rem;
+      line-height: 1.08;
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
+    .hero-proof-item small {
+      display: block;
+      margin-top: 4px;
+      color: #6f7f96;
+      font-size: .745rem;
+      line-height: 1.08;
+      font-weight: 620;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1200px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-visual {
+        width: min(880px, 100%) !important;
+      }
+
+      .hero-proof-strip {
+        width: min(650px, calc(100% - 110px)) !important;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .hero-visual {
+        width: 100% !important;
+        padding: 12px 12px 0 !important;
+        border-radius: 30px !important;
+      }
+
+      .hero-visual::before {
+        inset: -8px;
+        border-radius: 36px;
+      }
+
+      .hero-image-shell {
+        aspect-ratio: 4 / 3;
+        padding: 7px !important;
+        border-radius: 26px !important;
+      }
+
+      .hero-image-shell::before {
+        inset: 7px;
+        border-radius: 18px;
+      }
+
+      .hero-image {
+        border-radius: 18px !important;
+      }
+
+      .hero-proof-strip {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        margin-top: 14px;
+        grid-template-columns: 1fr !important;
+        padding: 14px 16px !important;
+      }
+
+      .hero-proof-item,
+      .hero-proof-item:first-child,
+      .hero-proof-item:last-child {
+        padding: 8px 0;
+      }
+
+      .hero-proof-item + .hero-proof-item::before {
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: auto;
+        width: auto;
+        height: 1px;
+      }
+    }
+
+  
+    /* v133: single soft frame, using unique classes so no old frame CSS can layer on top */
+    .visual-col {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      overflow: visible !important;
+      min-height: auto !important;
+      padding-top: 0 !important;
+    }
+
+    .soft-visual {
+      position: relative;
+      width: min(850px, 100%);
+      margin: 0 auto;
+      padding-bottom: 72px;
+      overflow: visible;
+      isolation: isolate;
+    }
+
+    .soft-frame {
+      position: relative;
+      padding: 10px;
+      border-radius: 40px;
+      overflow: visible;
+      background:
+        linear-gradient(135deg, rgba(235, 243, 255, .58), rgba(224, 233, 255, .30) 46%, rgba(220, 211, 255, .34)),
+        radial-gradient(circle at 86% 12%, rgba(153, 126, 255, .13), transparent 39%);
+      box-shadow:
+        0 20px 50px rgba(84, 96, 176, .095),
+        0 5px 16px rgba(15, 23, 42, .022),
+        inset 0 1px 0 rgba(255,255,255,.48);
+    }
+
+    .soft-frame::before {
+      content: "";
+      position: absolute;
+      inset: -16px;
+      z-index: -1;
+      border-radius: 52px;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 84% 14%, rgba(158, 132, 255, .17), transparent 40%),
+        radial-gradient(circle at 15% 18%, rgba(124, 158, 255, .10), transparent 34%),
+        linear-gradient(135deg, rgba(245,248,255,.26), rgba(229,235,255,.10));
+      filter: blur(20px);
+      opacity: .95;
+    }
+
+    .soft-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 31px;
+      box-shadow: none;
+    }
+
+    .soft-proofbar {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(648px, calc(100% - 136px));
+      min-height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 16px 24px;
+      border-radius: 26px;
+      border: 1px solid rgba(166, 177, 224, .16);
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.80));
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow:
+        0 18px 38px rgba(87, 95, 164, .13),
+        0 4px 12px rgba(15, 23, 42, .025),
+        inset 0 1px 0 rgba(255,255,255,.94);
+      z-index: 4;
+      overflow: visible;
+    }
+
+    .soft-proof-item {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 0 18px;
+    }
+
+    .soft-proof-item:first-child {
+      padding-left: 0;
+    }
+
+    .soft-proof-item:last-child {
+      padding-right: 0;
+    }
+
+    .soft-proof-icon {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 32px;
+      border-radius: 999px;
+      color: #6555ff;
+      font-size: 13px;
+      font-weight: 800;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(242,245,255,.95));
+      box-shadow:
+        inset 0 0 0 1px rgba(106,88,255,.16),
+        0 4px 10px rgba(106,88,255,.10);
+    }
+
+    .soft-proof-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .soft-proof-copy strong {
+      color: #2f3d58;
+      font-size: .88rem;
+      line-height: 1.08;
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
+    .soft-proof-copy span {
+      color: #6f7f96;
+      font-size: .765rem;
+      line-height: 1.08;
+      font-weight: 620;
+      white-space: nowrap;
+    }
+
+    .soft-proof-divider {
+      width: 1px;
+      height: 42px;
+      flex: 0 0 1px;
+      background: linear-gradient(180deg, transparent, rgba(105,117,175,.18), transparent);
+    }
+
+    @media (max-width: 1200px) {
+      .soft-visual {
+        width: min(880px, 100%);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .soft-visual {
+        width: 100%;
+        padding-bottom: 0;
+      }
+
+      .soft-frame {
+        padding: 7px;
+        border-radius: 24px;
+      }
+
+      .soft-frame::before {
+        inset: -8px;
+        border-radius: 32px;
+      }
+
+      .soft-image {
+        border-radius: 18px;
+      }
+
+      .soft-proofbar {
+        position: static;
+        transform: none;
+        width: 100%;
+        margin-top: 14px;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 14px 16px;
+      }
+
+      .soft-proof-item,
+      .soft-proof-item:first-child,
+      .soft-proof-item:last-child {
+        padding: 10px 0;
+      }
+
+      .soft-proof-divider {
+        width: 100%;
+        height: 1px;
+      }
+    }
+
+  
+    /* v136: balanced vertical rhythm in the left hero column */
+    .hero {
+      padding-top: clamp(24px, 2.6vw, 40px) !important;
+      padding-bottom: clamp(58px, 5vw, 82px) !important;
+    }
+
+    .heading {
+      margin-top: 22px !important;
+      font-size: clamp(2.72rem, 3.42vw, 4.04rem) !important;
+      line-height: 1.025 !important;
+    }
+
+    .lead {
+      margin-top: 19px !important;
+      line-height: 1.52 !important;
+    }
+
+    .chips {
+      margin-top: 19px !important;
+      gap: 7px 8px !important;
+    }
+
+    .cta-row {
+      margin-top: 19px !important;
+    }
+
+    .proofbar {
+      margin-top: 19px !important;
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+    }
+
+    .chip {
+      min-height: 33px !important;
+      padding-left: 9px !important;
+      padding-right: 12px !important;
+    }
+
+    .copy {
+      padding-top: 0 !important;
+    }
+
+    @media (max-width: 1200px) {
+      .hero {
+        padding-top: 28px !important;
+        padding-bottom: 64px !important;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .heading {
+        font-size: clamp(2.28rem, 8.4vw, 3.45rem) !important;
+      }
+
+      .lead,
+      .chips,
+      .cta-row,
+      .proofbar {
+        margin-top: 16px !important;
+      }
+    }
+
+  
+    /* v139: nudge the lower proof bar a bit upward from the previous version */
+    .proofbar {
+      margin-top: 68px !important;
+    }
+
+    .hero {
+      padding-bottom: clamp(50px, 4.6vw, 76px) !important;
+    }
+
+    @media (max-width: 860px) {
+      .proofbar {
+        margin-top: 46px !important;
+      }
+
+      .hero {
+        padding-bottom: 58px !important;
+      }
+    }
+
+  
+    /* v141: proofbar shortened to two-line items, lower height, extended width */
+    .proofbar {
+      width: min(970px, calc(100% + 220px)) !important;
+      margin-top: 52px !important;
+      margin-left: 0 !important;
+      padding: 12px 18px !important;
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 14px !important;
+      border-radius: 24px !important;
+      overflow: visible !important;
+    }
+
+    .proof {
+      grid-template-columns: 30px 1fr !important;
+      gap: 10px !important;
+      align-items: start !important;
+      min-width: 0;
+    }
+
+    .proof-ico {
+      width: 30px !important;
+      height: 30px !important;
+      border-radius: 11px !important;
+      font-size: 14px !important;
+      transform: translateY(1px);
+    }
+
+    .proof b {
+      font-size: .79rem !important;
+      line-height: 1.08 !important;
+      margin: 0 !important;
+    }
+
+    .proof small {
+      margin-top: 4px !important;
+      font-size: .70rem !important;
+      line-height: 1.18 !important;
+      max-width: 15ch;
+    }
+
+    @media (max-width: 1200px) {
+      .proofbar {
+        width: 100% !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      .proof small {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .proofbar {
+        margin-top: 34px !important;
+        grid-template-columns: 1fr !important;
+        padding: 12px 14px !important;
+      }
+    }
+
+  
+    /* v142: proofbar text stays in safe area, visual bridge continues under the right bar */
+    .proofbar {
+      position: relative !important;
+      width: min(920px, calc(100% + 170px)) !important;
+      margin-top: 52px !important;
+      padding: 11px 18px !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 16px !important;
+      overflow: visible !important;
+      isolation: auto !important;
+      z-index: 2 !important;
+    }
+
+    .proofbar::after {
+      content: "" !important;
+      position: absolute;
+      left: calc(100% - 10px);
+      top: 0;
+      width: 260px;
+      height: 100%;
+      border-radius: 0 24px 24px 0;
+      border: 1px solid rgba(87, 104, 145, .10);
+      border-left: 0;
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow:
+        18px 14px 34px rgba(15,23,42,.035),
+        inset 0 1px 0 rgba(255,255,255,.9);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .proof {
+      position: relative !important;
+      z-index: 1 !important;
+      grid-template-columns: 30px minmax(0, 1fr) !important;
+      gap: 10px !important;
+      align-items: center !important;
+      min-width: 0 !important;
+    }
+
+    .proof b {
+      white-space: nowrap !important;
+      font-size: .79rem !important;
+      line-height: 1.08 !important;
+    }
+
+    .proof small {
+      white-space: nowrap !important;
+      max-width: none !important;
+      font-size: .70rem !important;
+      line-height: 1.12 !important;
+      margin-top: 4px !important;
+    }
+
+    @media (max-width: 1200px) {
+      .proofbar {
+        width: 100% !important;
+      }
+
+      .proofbar::after {
+        display: none !important;
+      }
+
+      .proof b,
+      .proof small {
+        white-space: normal !important;
+      }
+    }
+
+  
+    /* v143: remove the empty proofbar bridge and let the right bar sit above the left one */
+    .copy {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+
+    .visual-col {
+      position: relative !important;
+      z-index: 4 !important;
+    }
+
+    .proofbar {
+      z-index: 1 !important;
+      isolation: auto !important;
+      overflow: hidden !important;
+    }
+
+    .proofbar::after {
+      content: none !important;
+      display: none !important;
+    }
+
+    .soft-proofbar {
+      z-index: 20 !important;
+    }
+
+  
+    /* v144: navigation typography and CTA proportions refined to match the UI chips */
+    .header-shell {
+      padding-top: 16px !important;
+      padding-bottom: 10px !important;
+    }
+
+    .header {
+      min-height: 76px !important;
+      padding-left: 22px !important;
+      padding-right: 22px !important;
+    }
+
+    .nav {
+      gap: clamp(22px, 2.05vw, 36px) !important;
+    }
+
+    .nav a {
+      font-size: .895rem !important;
+      font-weight: 700 !important;
+      letter-spacing: -.012em !important;
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+      color: #2d3b54 !important;
+    }
+
+    .header-cta {
+      gap: 12px !important;
+    }
+
+    .header-btn {
+      min-width: 184px !important;
+      min-height: 46px !important;
+      padding-left: 21px !important;
+      padding-right: 21px !important;
+      border-radius: 15px !important;
+      font-size: .895rem !important;
+      font-weight: 720 !important;
+      letter-spacing: -.012em !important;
+    }
+
+    .header-btn.primary {
+      box-shadow: 0 14px 30px rgba(92, 67, 240, .20), inset 0 1px 0 rgba(255,255,255,.24) !important;
+    }
+
+    @media (max-width: 1200px) {
+      .header {
+        min-height: auto !important;
+      }
+
+      .header-btn {
+        min-width: 178px !important;
+      }
+    }
+
+
+    /* v145: soften both lower bars and slim the right one without changing the overall composition */
+    .proofbar {
+      background: linear-gradient(180deg, rgba(255,255,255,.60), rgba(255,255,255,.46)) !important;
+      border: 1px solid rgba(255,255,255,.42) !important;
+      backdrop-filter: blur(20px) saturate(1.06) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(1.06) !important;
+      box-shadow: 0 14px 32px rgba(71, 83, 150, .065), inset 0 1px 0 rgba(255,255,255,.72) !important;
+    }
+
+    .proof-ico {
+      box-shadow: inset 0 0 0 1px rgba(98, 104, 255, .16), 0 4px 10px rgba(98,104,255,.08) !important;
+    }
+
+    .soft-proofbar {
+      min-height: 70px !important;
+      padding: 12px 22px !important;
+      border-radius: 24px !important;
+      border: 1px solid rgba(255,255,255,.44) !important;
+      background: linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,255,255,.54)) !important;
+      backdrop-filter: blur(20px) saturate(1.06) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(1.06) !important;
+      box-shadow: 0 14px 30px rgba(81, 91, 158, .09), inset 0 1px 0 rgba(255,255,255,.82) !important;
+      align-items: center !important;
+    }
+
+    .soft-proof-item {
+      min-height: 44px !important;
+      align-items: center !important;
+    }
+
+    .soft-proof-copy {
+      justify-content: center !important;
+      gap: 2px !important;
+    }
+
+    .soft-proof-copy strong,
+    .soft-proof-copy span,
+    .hero-proof-item b,
+    .hero-proof-item small {
+      text-wrap: balance;
+    }
+
+    .soft-proof-item strong {
+      line-height: 1.04 !important;
+    }
+
+    .soft-proof-item span {
+      line-height: 1.04 !important;
+    }
+
+    .soft-proof-divider {
+      height: 36px !important;
+      background: linear-gradient(180deg, transparent, rgba(109, 120, 183, .13), transparent) !important;
+    }
+
+    @media (max-width: 860px) {
+      .soft-proofbar {
+        min-height: 0 !important;
+        padding: 14px 16px !important;
+      }
+    }
+
+
+  
+    /* v146: right proofbar copy update, softer glass, and a small upward nudge */
+    .proofbar {
+      background: linear-gradient(180deg, rgba(255,255,255,.50), rgba(255,255,255,.34)) !important;
+      border-color: rgba(255,255,255,.34) !important;
+      backdrop-filter: blur(22px) saturate(1.08) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(1.08) !important;
+      box-shadow:
+        0 13px 30px rgba(71, 83, 150, .055),
+        inset 0 1px 0 rgba(255,255,255,.62) !important;
+    }
+
+    .soft-proofbar {
+      bottom: 9px !important;
+      min-height: 68px !important;
+      padding: 11px 22px !important;
+      background: linear-gradient(180deg, rgba(255,255,255,.58), rgba(255,255,255,.42)) !important;
+      border-color: rgba(255,255,255,.36) !important;
+      backdrop-filter: blur(22px) saturate(1.08) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(1.08) !important;
+      box-shadow:
+        0 13px 28px rgba(81, 91, 158, .075),
+        inset 0 1px 0 rgba(255,255,255,.70) !important;
+      align-items: center !important;
+    }
+
+    .soft-proof-item {
+      min-height: 42px !important;
+      align-items: center !important;
+    }
+
+    .soft-proof-copy {
+      justify-content: center !important;
+      gap: 2px !important;
+    }
+
+    .soft-proof-copy strong {
+      font-size: .84rem !important;
+      line-height: 1.04 !important;
+    }
+
+    .soft-proof-copy span {
+      font-size: .735rem !important;
+      line-height: 1.05 !important;
+    }
+
+    .soft-proof-divider {
+      height: 34px !important;
+      opacity: .8 !important;
+    }
+
+    @media (max-width: 860px) {
+      .soft-proofbar {
+        bottom: auto !important;
+        min-height: 0 !important;
+        padding: 14px 16px !important;
+      }
+    }
+
+  
+
+    /* v152: package cards updated with new matched-background renders */
+    .packages-section {
+      position: relative;
+      padding: 92px 0 96px;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .packages-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -4;
+      background:
+        linear-gradient(180deg, rgba(250,252,255,.30) 0%, rgba(247,249,255,.88) 14%, rgba(243,247,255,.98) 100%);
+    }
+
+    .packages-section::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 84% 12%, rgba(142, 125, 255, .12), transparent 20%),
+        radial-gradient(circle at 16% 24%, rgba(110, 154, 255, .06), transparent 22%),
+        linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.12) 100%);
+    }
+
+    .packages-divider {
+      width: min(1480px, calc(100% - 48px));
+      height: 1px;
+      margin: 0 auto;
+      background: linear-gradient(90deg, transparent, rgba(121, 136, 198, .12) 16%, rgba(121, 136, 198, .22) 50%, rgba(121, 136, 198, .12) 84%, transparent);
+      opacity: .72;
+    }
+
+    .packages-decor,
+    .packages-decor::before,
+    .packages-decor::after {
+      content: "";
+      position: absolute;
+      inset: auto;
+      pointer-events: none;
+      border-top: 1px solid rgba(143, 151, 220, .14);
+      border-right: 1px solid rgba(143, 151, 220, .09);
+      border-radius: 0 1000px 0 0;
+      transform: rotate(-4deg);
+      z-index: -2;
+    }
+
+    .packages-decor {
+      left: -16%;
+      top: 34px;
+      width: 64%;
+      height: 180px;
+      opacity: .42;
+    }
+
+    .packages-decor::before {
+      left: 6%;
+      top: 22px;
+      width: 92%;
+      height: 146px;
+      opacity: .84;
+    }
+
+    .packages-decor::after {
+      right: -38%;
+      top: 40px;
+      width: 92%;
+      height: 144px;
+      opacity: .52;
+    }
+
+    .packages-orb {
+      position: absolute;
+      right: min(0px, 1vw);
+      top: 22px;
+      width: min(420px, 33vw);
+      max-width: 32%;
+      opacity: .95;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(0 14px 28px rgba(120, 124, 220, .10));
+      z-index: -1;
+    }
+
+    .packages-head {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .packages-badge {
+      min-height: 42px;
+      padding: 0 18px;
+      font-size: .95rem;
+      font-weight: 710;
+      color: #5c57ff;
+      background: rgba(255,255,255,.68);
+    }
+
+    .packages-title {
+      margin: 28px auto 0;
+      max-width: 1020px;
+      color: #081326;
+      font-size: clamp(2.48rem, 3.12vw, 3.9rem);
+      line-height: 1.12;
+      letter-spacing: -.04em;
+      font-weight: 640;
+      text-wrap: balance;
+    }
+
+    .packages-title .gradient {
+      font-weight: 725;
+      background: linear-gradient(92deg, #4b58f7 0%, #655cff 50%, #765eff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .packages-lead {
+      max-width: 760px;
+      margin: 20px auto 0;
+      color: #576884;
+      font-size: 1rem;
+      line-height: 1.52;
+      letter-spacing: -.012em;
+      text-wrap: balance;
+    }
+
+    .packages-cta {
+      margin-top: 26px;
+      display: inline-flex;
+      min-width: 232px;
+      min-height: 56px;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 0 30px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: linear-gradient(90deg, #4b23de 0%, #6038ef 54%, #7a69ff 100%);
+      box-shadow: 0 18px 44px rgba(90, 68, 238, .24), inset 0 1px 0 rgba(255,255,255,.22);
+      color: #fff;
+      font-size: 1.02rem;
+      font-weight: 730;
+    }
+
+    .packages-pills {
+      position: relative;
+      z-index: 1;
+      margin: 34px auto 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .packages-pill {
+      min-height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      padding: 0 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(105, 122, 174, .12);
+      background: rgba(255,255,255,.76);
+      box-shadow: 0 8px 22px rgba(58, 89, 210, .05), inset 0 1px 0 rgba(255,255,255,.92);
+      color: #3c45d6;
+      font-size: .94rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .packages-pill svg {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .packages-cards {
+      position: relative;
+      z-index: 1;
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .package-card {
+      position: relative;
+      min-height: 342px;
+      padding: 22px 20px 10px;
+      border-radius: 28px;
+      border: 1px solid rgba(112, 126, 188, .09);
+      background: linear-gradient(180deg, rgba(252,253,255,.62), rgba(244,248,255,.40));
+      box-shadow: 0 12px 28px rgba(46, 61, 108, .038), inset 0 1px 0 rgba(255,255,255,.76);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .package-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,0) 34%);
+      opacity: .82;
+    }
+
+    .package-kicker {
+      color: #4b58f7;
+      font-size: .88rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .package-card h3 {
+      margin: 12px 0 0;
+      color: #0c1730;
+      font-size: clamp(1.15rem, 1.18vw, 1.34rem);
+      line-height: 1.16;
+      letter-spacing: -.03em;
+      font-weight: 760;
+      min-height: 72px;
+    }
+
+    .package-card p {
+      margin: 12px 0 0;
+      color: #536682;
+      font-size: .95rem;
+      line-height: 1.5;
+      letter-spacing: -.012em;
+      flex: 0 0 auto;
+    }
+
+    .package-illustration {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      margin-top: auto;
+      padding-top: 12px;
+      min-height: 164px;
+      height: 164px;
+    }
+
+    .package-illustration img {
+      width: auto;
+      max-width: 100%;
+      max-height: 164px;
+      height: auto;
+      object-fit: contain;
+      object-position: center bottom;
+      filter: drop-shadow(0 10px 16px rgba(129, 120, 255, .06));
+      image-rendering: auto;
+    }
+
+    .package-card:nth-child(1) .package-illustration img { transform: translateY(6px); }
+    .package-card:nth-child(2) .package-illustration img { transform: translateY(1px); }
+    .package-card:nth-child(3) .package-illustration img { transform: translateY(0px); }
+    .package-card:nth-child(4) .package-illustration img { transform: translateY(4px); }
+    .package-card:nth-child(5) .package-illustration img { transform: translateY(8px); }
+    .package-card:nth-child(6) .package-illustration img { transform: translateY(2px); }
+
+    @media (max-width: 1440px) {
+      .packages-cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 980px) {
+      .packages-section {
+        padding: 76px 0 82px;
+      }
+      .packages-orb {
+        width: min(320px, 42vw);
+        max-width: 42%;
+        top: 52px;
+        opacity: .85;
+      }
+      .packages-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .package-card {
+        min-height: 372px;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .packages-divider {
+        width: min(100% - 28px, 760px);
+      }
+      .packages-title {
+        font-size: clamp(2rem, 8vw, 3.2rem);
+      }
+      .packages-lead {
+        font-size: .96rem;
+      }
+      .packages-pills {
+        gap: 10px;
+      }
+      .packages-pill {
+        min-height: 46px;
+        padding: 0 18px;
+        font-size: .9rem;
+      }
+      .packages-cards {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .package-card {
+        min-height: auto;
+      }
+      .packages-orb,
+      .packages-decor,
+      .packages-decor::before,
+      .packages-decor::after {
+        display: none;
+      }
+    }
+
+  
+    /* v155: transparent generated package assets, stable baseline, no visible square image backgrounds */
+    .package-card {
+      min-height: 342px !important;
+      padding-bottom: 10px !important;
+    }
+
+    .package-illustration {
+      margin-top: auto !important;
+      padding-top: 12px !important;
+      height: 164px !important;
+      min-height: 164px !important;
+      display: flex !important;
+      align-items: flex-end !important;
+      justify-content: center !important;
+      overflow: visible !important;
+    }
+
+    .package-illustration img {
+      display: block !important;
+      width: auto !important;
+      max-width: 100% !important;
+      max-height: 164px !important;
+      height: auto !important;
+      object-fit: contain !important;
+      object-position: center bottom !important;
+      background: transparent !important;
+      mix-blend-mode: normal !important;
+      filter: drop-shadow(0 10px 16px rgba(129, 120, 255, .055)) !important;
+    }
+
+    .package-card:nth-child(1) .package-illustration img { transform: translateY(6px) !important; }
+    .package-card:nth-child(2) .package-illustration img { transform: translateY(2px) !important; }
+    .package-card:nth-child(3) .package-illustration img { transform: translateY(2px) !important; }
+    .package-card:nth-child(4) .package-illustration img { transform: translateY(5px) !important; }
+    .package-card:nth-child(5) .package-illustration img { transform: translateY(8px) !important; }
+    .package-card:nth-child(6) .package-illustration img { transform: translateY(4px) !important; }
+
+  
+    /* v156: glossy + subtle 3D effect for package cards only */
+    .package-card {
+      position: relative !important;
+      overflow: hidden !important;
+      border-radius: 28px !important;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(250,250,255,0.88) 52%, rgba(245,246,255,0.84) 100%) !important;
+      border: 1px solid rgba(147, 160, 255, 0.12) !important;
+      box-shadow:
+        0 14px 34px rgba(120, 130, 200, 0.10),
+        0 4px 10px rgba(120, 130, 200, 0.05),
+        inset 0 1px 0 rgba(255,255,255,0.88),
+        inset 0 -1px 0 rgba(160, 175, 255, 0.08) !important;
+      backdrop-filter: blur(10px) saturate(1.05) !important;
+      -webkit-backdrop-filter: blur(10px) saturate(1.05) !important;
+      transform: translateZ(0) !important;
+    }
+
+    .package-card::before {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: 27px;
+      background:
+        linear-gradient(140deg,
+          rgba(255,255,255,0.28) 0%,
+          rgba(255,255,255,0.08) 24%,
+          rgba(255,255,255,0.02) 45%,
+          rgba(170, 180, 255, 0.03) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .package-card::after {
+      content: '';
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      top: 10px;
+      height: 28%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.12) 55%, rgba(255,255,255,0) 100%);
+      filter: blur(0.4px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.95;
+    }
+
+    .package-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .package-card .package-illustration img {
+      filter: drop-shadow(0 12px 18px rgba(132, 126, 255, 0.08)) !important;
+    }
+
+  
+    /* v157: visibly stronger premium gloss + subtle 3D on cards only */
+    .package-card {
+      position: relative !important;
+      overflow: hidden !important;
+      isolation: isolate !important;
+      border-radius: 30px !important;
+      border: 1px solid rgba(128, 142, 230, .18) !important;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(255,255,255,.98) 0%, rgba(255,255,255,.55) 34%, transparent 62%),
+        linear-gradient(155deg, rgba(255,255,255,.92) 0%, rgba(249,250,255,.82) 43%, rgba(238,242,255,.76) 100%) !important;
+      box-shadow:
+        0 22px 46px rgba(74, 88, 160, .145),
+        0 7px 16px rgba(74, 88, 160, .075),
+        inset 0 1px 0 rgba(255,255,255,.98),
+        inset 0 -1px 0 rgba(111, 128, 220, .13),
+        inset 1px 0 0 rgba(255,255,255,.58),
+        inset -1px 0 0 rgba(113, 128, 220, .055) !important;
+      backdrop-filter: blur(12px) saturate(1.08) !important;
+      -webkit-backdrop-filter: blur(12px) saturate(1.08) !important;
+    }
+
+    .package-card::before {
+      content: "" !important;
+      position: absolute !important;
+      inset: 1px !important;
+      border-radius: 29px !important;
+      pointer-events: none !important;
+      z-index: 0 !important;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.70) 0%, rgba(255,255,255,.24) 20%, rgba(255,255,255,0) 48%),
+        linear-gradient(115deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.10) 31%, rgba(122,138,255,.055) 100%) !important;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.54),
+        inset 0 18px 30px rgba(255,255,255,.32) !important;
+      opacity: 1 !important;
+    }
+
+    .package-card::after {
+      content: "" !important;
+      position: absolute !important;
+      top: -42% !important;
+      left: -58% !important;
+      width: 82% !important;
+      height: 185% !important;
+      transform: rotate(19deg) !important;
+      pointer-events: none !important;
+      z-index: 0 !important;
+      background:
+        linear-gradient(90deg,
+          rgba(255,255,255,0) 0%,
+          rgba(255,255,255,.10) 32%,
+          rgba(255,255,255,.62) 50%,
+          rgba(255,255,255,.12) 68%,
+          rgba(255,255,255,0) 100%) !important;
+      opacity: .72 !important;
+      filter: blur(.2px) !important;
+    }
+
+    .package-card > * {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+
+  
+    /* v158: Microsoft-style typography for package cards and section intro only */
+    .packages-lead,
+    .package-card,
+    .package-card h3,
+    .package-card p,
+    .package-kicker {
+      font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+      font-feature-settings: "kern" 1, "liga" 1 !important;
+      text-rendering: geometricPrecision !important;
+    }
+
+    .packages-lead {
+      max-width: 780px !important;
+      line-height: 1.38 !important;
+      letter-spacing: -0.018em !important;
+      font-weight: 400 !important;
+      color: #53627a !important;
+    }
+
+    .package-kicker {
+      font-weight: 700 !important;
+      letter-spacing: .105em !important;
+    }
+
+    .package-card h3 {
+      font-weight: 700 !important;
+      letter-spacing: -0.032em !important;
+      line-height: 1.12 !important;
+    }
+
+    .package-card p {
+      line-height: 1.36 !important;
+      letter-spacing: -0.012em !important;
+      font-weight: 400 !important;
+      color: #526077 !important;
+    }
+
+  
+    /* v159: packages pill bar refinement */
+    .packages-pills {
+      gap: 10px;
+    }
+
+    .packages-pill {
+      min-height: 42px !important;
+      gap: 9px !important;
+      padding: 0 18px !important;
+      border-radius: 999px;
+      font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+      font-size: .94rem !important;
+      font-weight: 400 !important;
+      letter-spacing: -0.01em !important;
+      color: #111827 !important;
+      background: rgba(255,255,255,.72) !important;
+      border: 1px solid rgba(109, 124, 176, .11) !important;
+      box-shadow: 0 6px 16px rgba(58, 89, 210, .04), inset 0 1px 0 rgba(255,255,255,.9) !important;
+    }
+
+    .packages-pill svg {
+      width: 16px !important;
+      height: 16px !important;
+      flex: 0 0 16px !important;
+      color: #4653e6;
+      stroke-width: 1.8;
+    }
+
+  
+    /* v162: real orb/podium asset integrated as a background layer, no synthetic replacement */
+    .packages-section {
+      position: relative !important;
+      overflow: hidden !important;
+      isolation: isolate !important;
+      background:
+        radial-gradient(circle at 80% 16%, rgba(130, 119, 255, .060), transparent 31%),
+        radial-gradient(circle at 15% 30%, rgba(110, 154, 255, .035), transparent 28%),
+        linear-gradient(180deg, rgba(250,252,255,.96) 0%, rgba(246,249,255,.99) 42%, rgba(242,246,255,.985) 100%) !important;
+    }
+
+    .packages-section::after {
+      opacity: .58 !important;
+      background:
+        radial-gradient(circle at 82% 14%, rgba(142, 125, 255, .085), transparent 22%),
+        radial-gradient(circle at 16% 24%, rgba(110, 154, 255, .050), transparent 23%),
+        linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.10) 100%) !important;
+    }
+
+    .packages-decor {
+      opacity: .34 !important;
+      left: -18% !important;
+      top: 28px !important;
+      z-index: -2 !important;
+    }
+
+    .packages-orb {
+      display: block !important;
+      position: absolute !important;
+      right: -54px !important;
+      top: 30px !important;
+      width: min(620px, 42vw) !important;
+      max-width: none !important;
+      height: auto !important;
+      opacity: .78 !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      z-index: -1 !important;
+      mix-blend-mode: multiply !important;
+      filter:
+        saturate(1.02)
+        contrast(.99)
+        brightness(1.015)
+        drop-shadow(0 24px 34px rgba(116, 113, 224, .10)) !important;
+      mask-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0,0,0,.08) 8%,
+        rgba(0,0,0,.55) 21%,
+        rgba(0,0,0,.92) 35%,
+        #000 100%
+      ) !important;
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0,0,0,.08) 8%,
+        rgba(0,0,0,.55) 21%,
+        rgba(0,0,0,.92) 35%,
+        #000 100%
+      ) !important;
+    }
+
+    .packages-orb-softfade {
+      position: absolute !important;
+      right: -54px !important;
+      top: 18px !important;
+      width: min(620px, 42vw) !important;
+      height: calc(min(620px, 42vw) * 280 / 397 + 28px) !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      z-index: 0 !important;
+      background:
+        linear-gradient(180deg,
+          rgba(248,250,255,1) 0%,
+          rgba(248,250,255,.98) 5%,
+          rgba(248,250,255,.90) 11%,
+          rgba(248,250,255,.62) 18%,
+          rgba(248,250,255,.28) 26%,
+          rgba(248,250,255,.06) 34%,
+          rgba(248,250,255,0) 42%,
+          rgba(248,250,255,0) 72%,
+          rgba(246,249,255,.18) 84%,
+          rgba(246,249,255,.72) 94%,
+          rgba(246,249,255,.96) 100%),
+        linear-gradient(90deg,
+          rgba(248,250,255,.10) 0%,
+          rgba(248,250,255,0) 12%,
+          rgba(248,250,255,0) 84%,
+          rgba(248,250,255,.12) 92%,
+          rgba(248,250,255,.30) 100%);
+    }
+
+    .packages-head,
+    .packages-pills,
+    .packages-cards {
+      position: relative !important;
+      z-index: 3 !important;
+    }
+
+    @media (max-width: 1180px) {
+      .packages-orb {
+        right: -130px !important;
+        width: min(560px, 52vw) !important;
+        opacity: .52 !important;
+      }
+
+      .packages-orb-softfade {
+        right: -130px !important;
+        top: 12px !important;
+        width: min(560px, 52vw) !important;
+        height: calc(min(560px, 52vw) * 280 / 397 + 24px) !important;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .packages-orb,
+      .packages-orb-softfade {
+        display: none !important;
+      }
+    }
+
+  
+
+    /* v167: keep v165 transition intact, add only an ultra-subtle anti-banding film */
+    .packages-section {
+      isolation: isolate !important;
+    }
+
+    .packages-noise {
+      position: absolute !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      z-index: 1 !important;
+      opacity: .0115 !important;
+      mix-blend-mode: soft-light !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27220%27 height=%27220%27 viewBox=%270 0 220 220%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.78%27 numOctaves=%272%27 stitchTiles=%27stitch%27/%3E%3CfeColorMatrix type=%27saturate%27 values=%270%27/%3E%3C/filter%3E%3Crect width=%27220%27 height=%27220%27 filter=%27url(%23n)%27/%3E%3C/svg%3E") !important;
+      background-size: 220px 220px !important;
+      background-repeat: repeat !important;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.74) 0%, #000 12%, #000 100%) !important;
+      -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.74) 0%, #000 12%, #000 100%) !important;
+    }
+
+    .packages-smoothwash {
+      position: absolute !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      z-index: 1 !important;
+      opacity: .92 !important;
+      background:
+        radial-gradient(circle at 15% 33%, rgba(255,255,255,.28) 0%, rgba(255,255,255,.18) 16%, rgba(249,251,255,.10) 30%, rgba(247,249,255,0) 58%),
+        linear-gradient(90deg, rgba(248,250,255,.22) 0%, rgba(248,250,255,.14) 20%, rgba(248,250,255,.06) 38%, rgba(248,250,255,0) 58%),
+        linear-gradient(180deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,.018) 44%, rgba(255,255,255,0) 100%) !important;
+      filter: blur(24px) !important;
+      transform: translateZ(0) !important;
+    }
+
+    @media (max-width: 860px) {
+      .packages-noise {
+        display: none !important;
+      }
+    }
+    /* v165: seamless hero -> packages transition, divider removed, top blend softened */
+    .packages-divider {
+      display: none !important;
+    }
+
+    .packages-section {
+      margin-top: -44px !important;
+      padding-top: 136px !important;
+      background:
+        radial-gradient(circle at 80% 16%, rgba(130, 119, 255, .050), transparent 33%),
+        radial-gradient(circle at 15% 30%, rgba(110, 154, 255, .020), transparent 36%),
+        linear-gradient(180deg, rgba(250,252,255,.00) 0%, rgba(248,250,255,.34) 10%, rgba(246,249,255,.86) 24%, rgba(242,246,255,.985) 100%) !important;
+    }
+
+    .packages-section::before {
+      background:
+        linear-gradient(180deg, rgba(250,252,255,0) 0%, rgba(249,251,255,.15) 8%, rgba(247,249,255,.66) 20%, rgba(243,247,255,.98) 100%) !important;
+    }
+
+    .packages-section::after {
+      opacity: .48 !important;
+      background:
+        radial-gradient(circle at 82% 14%, rgba(142, 125, 255, .074), transparent 23%),
+        radial-gradient(circle at 16% 24%, rgba(110, 154, 255, .030), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.035) 22%, rgba(255,255,255,.10) 100%) !important;
+    }
+
+  
+    /* v172: clean restart of orb blending.
+       The orb artwork now has real alpha transparency at its edges,
+       so the page background and diagonal lines can remain visible behind it. */
+    .packages-orb {
+      right: -48px !important;
+      top: 26px !important;
+      width: min(640px, 43.5vw) !important;
+      opacity: .84 !important;
+      mix-blend-mode: multiply !important;
+      mask-image: none !important;
+      -webkit-mask-image: none !important;
+      filter:
+        saturate(1.01)
+        contrast(.99)
+        brightness(1.012)
+        drop-shadow(0 22px 32px rgba(116, 113, 224, .08)) !important;
+    }
+
+    .packages-orb-softfade {
+      display: none !important;
+    }
+
+    @media (max-width: 1180px) {
+      .packages-orb {
+        right: -118px !important;
+        top: 22px !important;
+        width: min(576px, 53vw) !important;
+        opacity: .60 !important;
+      }
+    }
+
+  
+
+    /* v177: clean the remaining horizontal top band around the orb zone */
+    .packages-section {
+      background:
+        radial-gradient(circle at 80% 16%, rgba(130,119,255,.042), transparent 36%),
+        radial-gradient(circle at 15% 30%, rgba(110,154,255,.016), transparent 42%),
+        linear-gradient(180deg,
+          rgba(250,252,255,0) 0%,
+          rgba(248,250,255,.08) 18%,
+          rgba(247,250,255,.26) 38%,
+          rgba(246,249,255,.64) 62%,
+          rgba(242,246,255,.985) 100%) !important;
+    }
+
+    .packages-section::before {
+      background:
+        linear-gradient(180deg,
+          rgba(250,252,255,0) 0%,
+          rgba(249,251,255,.03) 20%,
+          rgba(247,249,255,.16) 44%,
+          rgba(243,247,255,.74) 76%,
+          rgba(243,247,255,.98) 100%) !important;
+    }
+
+    .packages-section::after {
+      opacity: .38 !important;
+      background:
+        radial-gradient(circle at 82% 18%, rgba(142,125,255,.050), transparent 30%),
+        radial-gradient(circle at 16% 24%, rgba(110,154,255,.020), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.05) 100%) !important;
+    }
+
+
+    /* v179: blend the whole orb area via a wrapper mask so the top rectangle can disappear
+       without cutting into the sphere itself. */
+    .packages-orb-wrap {
+      position: absolute;
+      right: -48px;
+      top: 26px;
+      width: min(640px, 43.5vw);
+      max-width: 43.5vw;
+      pointer-events: none;
+      user-select: none;
+      z-index: -1;
+      isolation: isolate;
+      -webkit-mask-image: linear-gradient(180deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,.02) 8%,
+        rgba(0,0,0,.08) 14%,
+        rgba(0,0,0,.20) 20%,
+        rgba(0,0,0,.42) 27%,
+        rgba(0,0,0,.68) 33%,
+        rgba(0,0,0,.88) 38%,
+        rgba(0,0,0,.97) 43%,
+        #000 48%);
+      mask-image: linear-gradient(180deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,.02) 8%,
+        rgba(0,0,0,.08) 14%,
+        rgba(0,0,0,.20) 20%,
+        rgba(0,0,0,.42) 27%,
+        rgba(0,0,0,.68) 33%,
+        rgba(0,0,0,.88) 38%,
+        rgba(0,0,0,.97) 43%,
+        #000 48%);
+    }
+
+    .packages-orb-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg,
+        rgba(248,250,255,.20) 0%,
+        rgba(248,250,255,.09) 12%,
+        rgba(248,250,255,0) 24%,
+        rgba(248,250,255,0) 100%);
+      opacity: .55;
+    }
+
+    .packages-orb {
+      position: relative !important;
+      right: auto !important;
+      top: auto !important;
+      width: 100% !important;
+      max-width: none !important;
+      display: block !important;
+      opacity: .91 !important;
+      mix-blend-mode: normal !important;
+      filter: saturate(1.01) contrast(.99) brightness(1.01) drop-shadow(0 18px 28px rgba(116, 113, 224, .07)) !important;
+    }
+
+    @media (max-width: 1180px) {
+      .packages-orb-wrap {
+        right: -118px !important;
+        top: 22px !important;
+        width: min(576px, 53vw) !important;
+      }
+      .packages-orb {
+        opacity: .78 !important;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .packages-orb-wrap {
+        display: none !important;
+      }
+    }
+  
+
+    /* v180: restore the orb and fade the whole section in from transparent at the top.
+       This targets the section seam itself instead of cutting the orb artwork. */
+    .packages-orb-wrap {
+      display: none !important;
+    }
+
+    .packages-orb-softfade {
+      display: none !important;
+    }
+
+    .packages-section {
+      -webkit-mask-image: linear-gradient(180deg,
+        rgba(0,0,0,0) 0px,
+        rgba(0,0,0,.10) 12px,
+        rgba(0,0,0,.26) 28px,
+        rgba(0,0,0,.48) 48px,
+        rgba(0,0,0,.72) 72px,
+        rgba(0,0,0,.90) 98px,
+        rgba(0,0,0,.98) 118px,
+        #000 132px,
+        #000 100%);
+      mask-image: linear-gradient(180deg,
+        rgba(0,0,0,0) 0px,
+        rgba(0,0,0,.10) 12px,
+        rgba(0,0,0,.26) 28px,
+        rgba(0,0,0,.48) 48px,
+        rgba(0,0,0,.72) 72px,
+        rgba(0,0,0,.90) 98px,
+        rgba(0,0,0,.98) 118px,
+        #000 132px,
+        #000 100%);
+    }
+
+    .packages-orb {
+      position: absolute !important;
+      right: -48px !important;
+      top: 26px !important;
+      width: min(640px, 43.5vw) !important;
+      max-width: none !important;
+      height: auto !important;
+      display: block !important;
+      opacity: .84 !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      z-index: -1 !important;
+      mix-blend-mode: multiply !important;
+      filter:
+        saturate(1.01)
+        contrast(.99)
+        brightness(1.012)
+        drop-shadow(0 22px 32px rgba(116, 113, 224, .08)) !important;
+      -webkit-mask-image: none !important;
+      mask-image: none !important;
+    }
+
+    @media (max-width: 1180px) {
+      .packages-orb {
+        right: -118px !important;
+        top: 22px !important;
+        width: min(576px, 53vw) !important;
+        opacity: .60 !important;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .packages-section {
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+      }
+
+      .packages-orb {
+        display: none !important;
+      }
+    }
+
+
+    /* v181: split the top seam fade from the orb artwork.
+       The section itself gets the vertical dissolve, while the orb sits on its own cropped layer,
+       so the top rectangle can disappear without eating into the sphere. */
+    .packages-section {
+      -webkit-mask-image: none !important;
+      mask-image: none !important;
+      overflow: hidden !important;
+    }
+
+    .packages-section::before {
+      z-index: 0 !important;
+      background:
+        linear-gradient(180deg,
+          rgba(250,252,255,0) 0px,
+          rgba(249,251,255,.05) 16px,
+          rgba(248,250,255,.14) 36px,
+          rgba(247,249,255,.32) 64px,
+          rgba(245,248,255,.62) 96px,
+          rgba(243,247,255,.88) 132px,
+          rgba(243,247,255,.98) 168px,
+          rgba(243,247,255,.99) 100%) !important;
+    }
+
+    .packages-section::after {
+      z-index: 0 !important;
+    }
+
+    .packages-seam-fade {
+      position: absolute !important;
+      left: 0 !important;
+      right: 0 !important;
+      top: 0 !important;
+      height: 166px !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      z-index: 1 !important;
+      background:
+        linear-gradient(180deg,
+          rgba(249,251,255,.96) 0px,
+          rgba(249,251,255,.74) 16px,
+          rgba(248,250,255,.42) 42px,
+          rgba(247,249,255,.16) 82px,
+          rgba(246,249,255,.04) 122px,
+          rgba(246,249,255,0) 160px);
+      filter: blur(10px) !important;
+      opacity: .88 !important;
+    }
+
+    .packages-orb-layer {
+      position: absolute !important;
+      right: -48px !important;
+      top: 26px !important;
+      width: min(640px, 43.5vw) !important;
+      height: calc(min(640px, 43.5vw) * 244 / 397) !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      z-index: 2 !important;
+      isolation: isolate !important;
+      background: transparent !important;
+    }
+
+    .packages-orb-layer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background:
+        linear-gradient(180deg,
+          rgba(248,250,255,.92) 0%,
+          rgba(248,250,255,.26) 18%,
+          rgba(248,250,255,0) 34%),
+        linear-gradient(90deg,
+          rgba(248,250,255,.06) 0%,
+          rgba(248,250,255,0) 10%,
+          rgba(248,250,255,0) 100%);
+      mix-blend-mode: screen;
+    }
+
+    .packages-orb {
+      position: absolute !important;
+      left: 0 !important;
+      right: auto !important;
+      top: -26px !important;
+      width: 100% !important;
+      max-width: none !important;
+      height: auto !important;
+      display: block !important;
+      opacity: .82 !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      z-index: 1 !important;
+      mix-blend-mode: multiply !important;
+      filter:
+        saturate(1.01)
+        contrast(.99)
+        brightness(1.012)
+        drop-shadow(0 22px 32px rgba(116, 113, 224, .08)) !important;
+      -webkit-mask-image: none !important;
+      mask-image: none !important;
+    }
+
+    .packages-head,
+    .packages-pills,
+    .packages-cards,
+    .packages-smoothwash,
+    .packages-noise {
+      position: relative !important;
+      z-index: 3 !important;
+    }
+
+    .packages-smoothwash,
+    .packages-noise {
+      z-index: 2 !important;
+    }
+
+    @media (max-width: 1180px) {
+      .packages-orb-layer {
+        right: -118px !important;
+        top: 22px !important;
+        width: min(576px, 53vw) !important;
+        height: calc(min(576px, 53vw) * 244 / 397) !important;
+      }
+      .packages-orb {
+        opacity: .60 !important;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .packages-seam-fade,
+      .packages-orb-layer {
+        display: none !important;
+      }
+    }
+
+  </style>
+
+<style id="v183-overrides">
+  /* v183: keep the orb asset intact and move the top dissolve to the section background itself.
+     The upper zone stays essentially background-only; the soft section tint starts lower,
+     so the horizontal seam can disappear without touching the sphere. */
+  .packages-divider{display:none !important;}
+
+  .packages-section{
+    position: relative !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .packages-section::before{
+    content:"" !important;
+    position:absolute !important;
+    left:0 !important;
+    right:0 !important;
+    top:82px !important;
+    bottom:0 !important;
+    z-index:0 !important;
+    pointer-events:none !important;
+    background:
+      radial-gradient(circle at 80% 14%, rgba(130,119,255,.045), transparent 34%),
+      radial-gradient(circle at 15% 22%, rgba(110,154,255,.018), transparent 40%),
+      linear-gradient(180deg,
+        rgba(250,252,255,0) 0%,
+        rgba(248,250,255,.10) 14%,
+        rgba(247,249,255,.30) 30%,
+        rgba(245,248,255,.66) 48%,
+        rgba(242,246,255,.98) 100%) !important;
+  }
+
+  .packages-section::after{
+    content:"" !important;
+    position:absolute !important;
+    left:0 !important;
+    right:0 !important;
+    top:0 !important;
+    height:118px !important;
+    z-index:0 !important;
+    pointer-events:none !important;
+    background: linear-gradient(180deg, rgba(247,249,255,.10) 0%, rgba(247,249,255,.03) 55%, rgba(247,249,255,0) 100%) !important;
+    filter: blur(18px) !important;
+    opacity:.75 !important;
+  }
+
+  .packages-seam-fade{display:none !important;}
+
+  .packages-orb-layer{
+    position:absolute !important;
+    right:-48px !important;
+    top:28px !important;
+    width:min(640px,43.5vw) !important;
+    height:calc(min(640px,43.5vw) * 244 / 397) !important;
+    overflow:visible !important;
+    pointer-events:none !important;
+    user-select:none !important;
+    z-index:2 !important;
+    isolation:isolate !important;
+    background:transparent !important;
+  }
+
+  .packages-orb-layer::before, .packages-orb-softfade{display:none !important;}
+
+  .packages-orb{
+    position:absolute !important;
+    left:0 !important;
+    top:0 !important;
+    width:100% !important;
+    height:auto !important;
+    display:block !important;
+    opacity:.84 !important;
+    z-index:1 !important;
+    mix-blend-mode:multiply !important;
+    filter:saturate(1.01) contrast(.99) brightness(1.012) drop-shadow(0 22px 32px rgba(116,113,224,.08)) !important;
+    -webkit-mask-image:none !important;
+    mask-image:none !important;
+  }
+
+  .packages-head, .packages-pills, .packages-cards, .packages-smoothwash, .packages-noise{
+    position:relative !important;
+    z-index:3 !important;
+  }
+  .packages-smoothwash, .packages-noise{z-index:2 !important;}
+
+  @media (max-width:1180px){
+    .packages-orb-layer{right:-118px !important; top:24px !important; width:min(576px,53vw) !important; height:calc(min(576px,53vw) * 244 / 397) !important;}
+    .packages-orb{opacity:.60 !important;}
+  }
+  @media (max-width:860px){
+    .packages-orb-layer{display:none !important;}
+  }
+</style>
+
+
+<style id="v185-css-orb-scene">
+  /* v185: CSS/SVG-style orb scene. No rectangular raster background is used here,
+     so the former image edge cannot appear and the sphere cannot be cut by a mask. */
+
+  .packages-section {
+    overflow: hidden !important;
+    background:
+      radial-gradient(circle at 80% 22%, rgba(130,119,255,.052), transparent 34%),
+      radial-gradient(circle at 16% 30%, rgba(110,154,255,.018), transparent 42%),
+      linear-gradient(180deg,
+        rgba(250,252,255,0) 0%,
+        rgba(248,250,255,.06) 18%,
+        rgba(247,249,255,.22) 38%,
+        rgba(246,249,255,.58) 62%,
+        rgba(242,246,255,.985) 100%) !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .packages-section::before {
+    background:
+      linear-gradient(180deg,
+        rgba(250,252,255,0) 0%,
+        rgba(249,251,255,.02) 24%,
+        rgba(247,249,255,.12) 48%,
+        rgba(243,247,255,.70) 78%,
+        rgba(243,247,255,.98) 100%) !important;
+  }
+
+  .packages-section::after {
+    opacity: .34 !important;
+    background:
+      radial-gradient(circle at 82% 21%, rgba(142,125,255,.045), transparent 31%),
+      radial-gradient(circle at 16% 24%, rgba(110,154,255,.018), transparent 35%),
+      linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.045) 100%) !important;
+  }
+
+  .packages-orb,
+  .packages-orb-layer,
+  .packages-orb-wrap,
+  .packages-orb-softfade,
+  .packages-seam-fade {
+    display: none !important;
+  }
+
+  .packages-css-orb-scene {
+    position: absolute;
+    right: -2.5vw;
+    top: 20px;
+    width: min(680px, 46vw);
+    height: min(430px, 29vw);
+    pointer-events: none;
+    user-select: none;
+    z-index: 2;
+    overflow: visible;
+    opacity: .92;
+  }
+
+  .packages-css-orb-scene::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(138deg,
+        transparent 0 50%,
+        rgba(102,116,220,.045) 50.2% 50.55%,
+        transparent 50.75% 100%),
+      linear-gradient(145deg,
+        transparent 0 42%,
+        rgba(111,125,222,.030) 42.2% 42.52%,
+        transparent 42.75% 100%),
+      linear-gradient(152deg,
+        transparent 0 58%,
+        rgba(116,128,226,.028) 58.2% 58.52%,
+        transparent 58.75% 100%);
+    transform: translateY(-18px);
+    filter: blur(.1px);
+    opacity: .95;
+  }
+
+  .packages-css-orb-scene::after {
+    content: "";
+    position: absolute;
+    left: 10%;
+    right: -16%;
+    top: 34%;
+    height: 46%;
+    border-radius: 50% 0 0 18%;
+    background:
+      linear-gradient(180deg,
+        rgba(123,112,255,.075) 0%,
+        rgba(122,112,255,.040) 42%,
+        rgba(122,112,255,.012) 70%,
+        transparent 100%),
+      linear-gradient(174deg,
+        transparent 0 58%,
+        rgba(255,255,255,.88) 58.2% 60.2%,
+        transparent 61.3% 100%);
+    box-shadow:
+      inset 0 20px 36px rgba(255,255,255,.44),
+      inset 0 -18px 42px rgba(103,98,190,.045);
+    filter: blur(.15px);
+    transform: perspective(600px) rotateX(54deg) rotateZ(1.2deg);
+    transform-origin: center;
+    opacity: .98;
+  }
+
+  .css-orb {
+    position: absolute;
+    right: 28%;
+    top: 23%;
+    width: clamp(82px, 7.5vw, 134px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 28% 34%, rgba(255,255,255,.96) 0 10%, rgba(255,255,255,.54) 11% 23%, transparent 24%),
+      radial-gradient(circle at 78% 22%, rgba(255,255,255,.68) 0 12%, transparent 25%),
+      radial-gradient(circle at 46% 44%, rgba(125,114,255,.72), rgba(139,132,255,.45) 46%, rgba(119,111,236,.30) 68%, rgba(117,111,229,.12) 100%);
+    box-shadow:
+      0 32px 42px rgba(106,96,214,.13),
+      inset -18px -16px 28px rgba(105,96,213,.18),
+      inset 12px 14px 22px rgba(255,255,255,.36);
+    filter: blur(.1px);
+    opacity: .82;
+  }
+
+  .css-orb::before {
+    content: "";
+    position: absolute;
+    left: 9%;
+    right: 8%;
+    top: 46%;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(84,80,190,.30), transparent);
+    filter: blur(.2px);
+    opacity: .74;
+  }
+
+  .css-orb::after {
+    content: "";
+    position: absolute;
+    left: 40%;
+    bottom: -8%;
+    width: 20%;
+    height: 8%;
+    border-radius: 50%;
+    background: rgba(113,104,226,.28);
+    filter: blur(7px);
+  }
+
+  .css-platform {
+    position: absolute;
+    left: 8%;
+    right: -20%;
+    top: 58%;
+    height: 38%;
+    transform: perspective(680px) rotateX(56deg) rotateZ(.8deg);
+    transform-origin: center;
+    border-radius: 22px 0 0 18px;
+    background:
+      linear-gradient(168deg,
+        transparent 0 40%,
+        rgba(255,255,255,.94) 40.4% 42.3%,
+        transparent 43.1% 100%),
+      linear-gradient(10deg,
+        transparent 0 55%,
+        rgba(136,126,255,.13) 55.5% 57.2%,
+        transparent 58% 100%),
+      linear-gradient(180deg,
+        rgba(118,108,255,.045),
+        rgba(118,108,255,.018) 50%,
+        transparent);
+    box-shadow:
+      inset 0 16px 24px rgba(255,255,255,.44),
+      0 22px 36px rgba(119,111,226,.055);
+    opacity: .96;
+  }
+
+  .packages-head,
+  .packages-pills,
+  .packages-cards,
+  .packages-smoothwash,
+  .packages-noise {
+    position: relative !important;
+    z-index: 3 !important;
+  }
+
+  @media (max-width: 1180px) {
+    .packages-css-orb-scene {
+      right: -13vw;
+      width: min(610px, 56vw);
+      height: min(388px, 36vw);
+      opacity: .70;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .packages-css-orb-scene {
+      display: none !important;
+    }
+  }
+</style>
+
+
+<style id="v186-cutout-orb-overlay">
+  /* v186: revert to the real cutout orb asset over a soft translucent section background.
+     The raster scene is kept as a precisely feathered transparent object and placed directly
+     on top of the section, so the background stays native and the motif does not disappear. */
+
+  .packages-css-orb-scene {
+    display: none !important;
+  }
+
+  .packages-section {
+    position: relative !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    isolation: isolate !important;
+  }
+
+  .packages-section::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    background:
+      radial-gradient(circle at 82% 18%, rgba(141, 125, 255, .07), transparent 24%),
+      radial-gradient(circle at 16% 26%, rgba(110, 154, 255, .035), transparent 28%),
+      linear-gradient(180deg,
+        rgba(255,255,255,.08) 0%,
+        rgba(255,255,255,.18) 7%,
+        rgba(250,252,255,.34) 16%,
+        rgba(248,250,255,.52) 28%,
+        rgba(246,249,255,.70) 44%,
+        rgba(244,248,255,.86) 66%,
+        rgba(242,246,255,.95) 100%) !important;
+  }
+
+  .packages-section::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    height: 148px !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+    background: linear-gradient(180deg,
+      rgba(248,250,255,.34) 0%,
+      rgba(248,250,255,.16) 32%,
+      rgba(248,250,255,.06) 58%,
+      rgba(248,250,255,0) 100%) !important;
+    filter: blur(12px) !important;
+    opacity: .92 !important;
+  }
+
+  .packages-decor,
+  .packages-smoothwash,
+  .packages-noise {
+    z-index: 1 !important;
+  }
+
+  .packages-orb-cutout-wrap {
+    position: absolute;
+    right: -34px;
+    top: 14px;
+    width: min(560px, 39vw);
+    pointer-events: none;
+    user-select: none;
+    z-index: 2;
+  }
+
+  .packages-orb-cutout {
+    display: block;
+    width: 100%;
+    height: auto;
+    opacity: .96;
+    filter:
+      saturate(1.02)
+      brightness(1.015)
+      blur(.18px)
+      drop-shadow(0 18px 30px rgba(113, 107, 223, .09));
+    transform: translateZ(0);
+  }
+
+  .packages-head,
+  .packages-pills,
+  .packages-cards {
+    position: relative !important;
+    z-index: 3 !important;
+  }
+
+  @media (max-width: 1180px) {
+    .packages-orb-cutout-wrap {
+      right: -112px;
+      top: 18px;
+      width: min(500px, 48vw);
+    }
+
+    .packages-orb-cutout {
+      opacity: .76;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .packages-orb-cutout-wrap {
+      display: none !important;
+    }
+
+    .packages-section {
+      padding-top: 82px !important;
+    }
+  }
+</style>
+
+
+<style id="v192-algorithmic-wave-decor">
+  /* v192: no bitmap cutouts, no background removal, only transparent algorithmic SVG waves. */
+
+  .packages-css-orb-scene,
+  .packages-orb-cutout-wrap,
+  .packages-decor,
+  .packages-smoothwash,
+  .packages-noise {
+    display: none !important;
+  }
+
+  .packages-section {
+    position: relative !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    isolation: isolate !important;
+  }
+
+  .packages-section::before,
+  .packages-section::after {
+    content: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  .packages-wave-system {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .packages-wave-left,
+  .packages-wave-right,
+  .packages-wave-bottom {
+    position: absolute;
+    display: block;
+  }
+
+  .packages-wave-left {
+    left: -2%;
+    top: 0;
+    width: min(33vw, 520px);
+    height: 320px;
+    opacity: .95;
+  }
+
+  .packages-wave-right {
+    right: -1%;
+    top: 18px;
+    width: min(31vw, 480px);
+    height: 280px;
+    opacity: .92;
+  }
+
+  .packages-wave-bottom {
+    left: -3%;
+    bottom: 120px;
+    width: min(48vw, 760px);
+    height: 160px;
+    opacity: .82;
+  }
+
+  .packages-wave-system svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .packages-wave-system path,
+  .packages-wave-system ellipse {
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .packages-wave-soft {
+    filter: blur(0.2px);
+  }
+
+  .packages-head,
+  .packages-pills,
+  .packages-cards {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  @media (max-width: 1180px) {
+    .packages-wave-left {
+      width: min(34vw, 410px);
+      height: 280px;
+    }
+
+    .packages-wave-right {
+      width: min(28vw, 340px);
+      height: 240px;
+      top: 34px;
+    }
+
+    .packages-wave-bottom {
+      width: min(52vw, 560px);
+      bottom: 130px;
+      height: 120px;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .packages-wave-left {
+      width: 240px;
+      height: 200px;
+      opacity: .88;
+    }
+
+    .packages-wave-right {
+      width: 200px;
+      height: 150px;
+      top: 64px;
+      opacity: .66;
+    }
+
+    .packages-wave-bottom {
+      width: 320px;
+      height: 84px;
+      bottom: 140px;
+      opacity: .58;
+    }
+  }
+</style>
+
+
+
+
+
+
+<style id="v197-react-svg-orbit-diagram">
+  .benefits-section {
+    position: relative;
+    overflow: hidden;
+    padding: 26px 0 96px;
+    background:
+      radial-gradient(circle at 18% 14%, rgba(120, 111, 255, .13), transparent 23%),
+      radial-gradient(circle at 84% 10%, rgba(96, 150, 255, .12), transparent 24%),
+      linear-gradient(180deg, #e7edf9 0%, #e0e7f6 46%, #e7eefb 100%);
+    isolation: isolate;
+  }
+
+  .benefits-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(91, 109, 163, .05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91, 109, 163, .05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    opacity: .34;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.58) 18%, rgba(0,0,0,.58) 82%, rgba(0,0,0,.22));
+  }
+
+  .benefits-shell {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .benefits-top-visual {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 0 0 18px;
+  }
+
+  .benefits-top-visual img {
+    display: block;
+    width: min(100%, 620px);
+    height: auto;
+    filter: drop-shadow(0 24px 36px rgba(78, 92, 148, .10));
+  }
+
+  .benefits-title {
+    margin: 0 0 18px;
+    text-align: center;
+    font-size: clamp(34px, 4.2vw, 56px);
+    line-height: 1.08;
+    letter-spacing: -.04em;
+    color: #071330;
+  }
+
+  .benefits-intro {
+    width: min(100%, 1160px);
+    margin: 0 auto 26px;
+    text-align: center;
+    font-family: "Segoe UI", "Segoe UI Variable Text", SegoeUI, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: clamp(14px, 1.02vw, 18px);
+    line-height: 1.28;
+    letter-spacing: -0.01em;
+    font-weight: 400;
+    color: #30415f;
+    text-wrap: pretty;
+  }
+
+  .package-orbit-component {
+    width: min(100%, 720px);
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .package-orbit-component::before {
+    content: "";
+    position: absolute;
+    inset: 9% 9% 7%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(116, 120, 255, .16), rgba(255,255,255,0) 62%),
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,.78), rgba(255,255,255,0) 68%);
+    filter: blur(10px);
+    pointer-events: none;
+  }
+
+  .package-orbit-svg {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+
+
+  .orbit-ring-base {
+    fill: none;
+    stroke: rgba(255,255,255,.62);
+    stroke-width: 76;
+    filter: url(#orbitSoftShadow);
+  }
+
+  .orbit-ring-gradient {
+    fill: none;
+    stroke: url(#orbitRingGradient);
+    stroke-width: 62;
+    stroke-linecap: round;
+    opacity: .94;
+  }
+
+  .orbit-ring-hairline {
+    fill: none;
+    stroke: rgba(74, 104, 170, .18);
+    stroke-width: 2;
+    stroke-dasharray: 6 16;
+  }
+
+  .orbit-arrow {
+    stroke: rgba(73, 93, 150, .72);
+    stroke-width: 3.2;
+    fill: none;
+    stroke-linecap: round;
+    filter: url(#orbitArrowGlow);
+  }
+
+  .orbit-arrow--emphasis {
+    stroke: rgba(73, 93, 150, .92);
+    stroke-width: 4.4;
+    filter: url(#orbitArrowGlow);
+  }
+
+
+  .orbit-center-disc {
+    fill: url(#orbitCenterFill);
+    stroke: rgba(255,255,255,.82);
+    stroke-width: 8;
+    filter: url(#orbitCenterShadow);
+  }
+
+  .orbit-center-ring {
+    fill: none;
+    stroke: rgba(103, 129, 210, .24);
+    stroke-width: 3;
+  }
+
+  .orbit-center-title {
+    font: 850 48px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    fill: #081630;
+    letter-spacing: -.035em;
+  }
+
+  .orbit-center-subtitle {
+    font: 760 23px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    fill: #65728f;
+    letter-spacing: .12em;
+  }
+
+  .orbit-node-rim {
+    fill: rgba(255,255,255,.88);
+    filter: url(#orbitNodeShadow);
+  }
+
+  .orbit-node-inner {
+    stroke: rgba(255,255,255,.64);
+    stroke-width: 3;
+  }
+
+  .orbit-node-gloss {
+    fill: url(#orbitGloss);
+    opacity: .68;
+  }
+
+  .orbit-node-icon,
+  .orbit-node-accent {
+    display: none;
+  }
+
+  .orbit-callout-line {
+    fill: none;
+    stroke: rgba(84, 103, 156, .40);
+    stroke-width: 1.95;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 4 8;
+  }
+
+  .orbit-callout-dot {
+    fill: rgba(255,255,255,.97);
+    stroke: rgba(111, 126, 190, .54);
+    stroke-width: 1.8;
+    filter: url(#orbitArrowGlow);
+  }
+
+  .orbit-callout-text {
+    font: 780 17.6px/1.03 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    fill: rgba(45, 58, 91, .88);
+    letter-spacing: -.016em;
+  }
+
+
+  .orbit-node-text {
+    font: 850 36px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    fill: #fff;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    paint-order: stroke;
+    stroke: rgba(32, 41, 88, .18);
+    stroke-width: 2.2px;
+    letter-spacing: -.025em;
+  }
+
+  @media (max-width: 980px) {
+    .benefits-section { padding: 18px 0 74px; }
+    .benefits-top-visual img { width: min(100%, 520px); }
+    .package-orbit-component { width: min(100%, 720px); }
+  }
+
+  @media (max-width: 720px) {
+    .benefits-section { padding: 12px 0 58px; }
+    .benefits-top-visual { margin-bottom: 12px; }
+    .benefits-top-visual img { width: min(100%, 420px); }
+    .benefits-title { font-size: clamp(30px, 8.8vw, 40px); margin-bottom: 16px; }
+    .package-orbit-component { width: min(100%, 460px); }
+    .orbit-center-title { font-size: 42px; }
+    .orbit-node-text { font-size: 24px; }
+    .orbit-callout-text { font-size: 13px; }
+    .orbit-callout-line, .orbit-callout-dot { opacity: .72; }
+  }
+</style>
+
+
+
+
+
+
+<style id="v208-premium-wheel-fix">
+.package-orbit-component { width: min(100%, 1180px); margin: 0 auto; position: relative; }
+.package-orbit-component::before { content:none; display:none; }
+.premium-wheel-svg { display:block; width:100%; height:auto; overflow:visible; }
+.wheel-panel { display:none; }
+.wheel-ambient { fill:url(#ambientGlow); opacity:.92; }
+.wheel-ring-base { fill:none; stroke:rgba(255,255,255,.52); stroke-width:38; filter:url(#shadowPanel); }
+.wheel-ring-color { fill:none; stroke:url(#ringMain); stroke-width:28; stroke-linecap:round; filter:url(#glowRing); }
+.wheel-ring-highlight { fill:none; stroke:url(#ringGlass); stroke-width:28; stroke-linecap:round; opacity:.26; }
+.wheel-inner-guide { fill:none; stroke:rgba(113,129,177,.16); stroke-width:1.8; stroke-dasharray:4 14; }
+.wheel-center-disc { fill:url(#centerFill); stroke:rgba(255,255,255,.88); stroke-width:7; filter:url(#shadowPanel); }
+.wheel-center-shine { fill:rgba(255,255,255,.34); filter:blur(10px); }
+.wheel-center-ring { fill:none; stroke:rgba(168,181,214,.11); stroke-width:1.6; }
+.wheel-center-title { font:900 42px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill:#0b1732; letter-spacing:-.035em; dominant-baseline:middle; }
+.wheel-center-subtitle { font:760 18px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill:#6b7895; letter-spacing:.16em; dominant-baseline:middle; }
+.wheel-node-ring { fill:rgba(255,255,255,.44); stroke:rgba(255,255,255,.84); stroke-width:2.2; filter:url(#shadowNode); }
+.wheel-node-body { stroke:rgba(255,255,255,.42); stroke-width:1.8; filter:url(#glowNode); }
+.wheel-node-shine { fill:url(#nodeGloss); opacity:.82; }
+.wheel-node-label { font:830 28px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill:#fff; paint-order:stroke; stroke:rgba(23,37,77,.16); stroke-width:1.2px; letter-spacing:-.02em; dominant-baseline:middle; }
+.wheel-node-icon { fill:none; stroke:rgba(255,255,255,.92); stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; opacity:.94; }
+.wheel-arrow-layer { isolation:isolate; }
+.wheel-arrow-fill { fill:#586d95; opacity:1; filter:url(#glowArrow); }
+.wheel-callout-line { fill:none; stroke:rgba(156,178,231,.88); stroke-width:1.35; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:2 7; }
+.wheel-callout-dot { fill:rgba(255,255,255,.98); stroke:rgba(153,172,224,.82); stroke-width:1.4; }
+.wheel-callout-text { font:700 14px/1.08 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill:#44536f; letter-spacing:-.01em; }
+
+
+  .workflow-section {
+    position: relative;
+    padding: 178px 0 92px;
+    margin-top: -118px;
+    background: transparent;
+    overflow: visible;
+    z-index: 0;
+  }
+
+  .workflow-surface {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 210px;
+    bottom: 0;
+    z-index: 0;
+    background: #eef3fb;
+  }
+
+  .workflow-wave {
+    position: absolute;
+    left: -3px;
+    top: 0;
+    width: calc(100% + 6px);
+    height: 210px;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+  }
+
+  .workflow-wave svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .workflow-wave-fill {
+    fill: #eef3fb;
+  }
+
+  .workflow-wave-stroke {
+    fill: none;
+    stroke: rgba(255,255,255,.62);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .workflow-shell {
+    position: relative;
+    z-index: 2;
+    width: min(100%, 1540px);
+  }
+
+  .workflow-head {
+    max-width: 980px;
+    margin: 0 auto 30px;
+    text-align: center;
+  }
+
+  .workflow-title {
+    margin: 0 0 10px;
+    font-size: clamp(34px, 4.4vw, 58px);
+    line-height: 1.04;
+    letter-spacing: -.048em;
+    color: #071330;
+  }
+
+  .workflow-lead {
+    margin: 0 auto;
+    max-width: 940px;
+    font-family: "Segoe UI", "Segoe UI Variable Text", SegoeUI, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: clamp(15px, 1.1vw, 19px);
+    line-height: 1.28;
+    letter-spacing: -0.012em;
+    color: #4b5b77;
+    text-wrap: balance;
+  }
+
+  .workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px;
+    align-items: stretch;
+  }
+
+  .workflow-grid {
+    max-width: 1460px;
+    margin: 0 auto;
+  }
+
+  .workflow-card {
+    position: relative;
+    min-height: 286px;
+    padding: 24px 26px 24px;
+    background: linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(248,250,255,.98) 100%);
+    border: 1px solid rgba(208, 216, 233, .98);
+    box-shadow: 0 2px 4px rgba(15, 24, 45, .08), 0 10px 18px rgba(43, 57, 92, .10), 0 26px 48px rgba(43, 57, 92, .18);
+    overflow: hidden;
+  }
+
+  .workflow-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,0));
+    pointer-events: none;
+  }
+
+  .workflow-card::after {
+    content: "";
+    position: absolute;
+    left: 26px;
+    right: 26px;
+    bottom: 48px;
+    height: 1px;
+    background: #e2e8f4;
+  }
+
+  .workflow-number {
+    display: inline-block;
+    margin: 0 0 16px;
+    font-size: 22px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: #6b58f5;
+  }
+
+  .workflow-accent {
+    width: 88px;
+    height: 4px;
+    margin: 0 0 18px;
+    background: linear-gradient(90deg, #6650f3 0%, #6650f3 54%, #d0d6ea 54%, #d0d6ea 100%);
+  }
+
+  .workflow-copy {
+    margin: 0;
+    font-family: "Segoe UI", "Segoe UI Variable Text", SegoeUI, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: clamp(14px, 0.95vw, 17px);
+    line-height: 1.18;
+    letter-spacing: -0.012em;
+    font-weight: 400;
+    color: #12203d;
+    text-align: left;
+    max-width: 100%;
+  }
+
+  .workflow-card-ornament {
+    position: absolute;
+    left: 26px;
+    right: 26px;
+    bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .workflow-orbit {
+    width: 52px;
+    height: 22px;
+    border-top: 2px solid #cfd8ec;
+    border-right: 2px solid transparent;
+    border-radius: 50px 50px 0 0;
+    opacity: .95;
+  }
+
+  .workflow-dots {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .workflow-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: block;
+  }
+
+  .workflow-dots span:nth-child(1) { background: #6f5cf6; }
+  .workflow-dots span:nth-child(2) { background: #5f96f7; }
+  .workflow-dots span:nth-child(3) { background: #57c6d8; }
+
+@media (max-width:1280px){ .workflow-shell{width:min(100%,1320px)} .workflow-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:1120px;} .workflow-card{min-height:270px;} }
+@media (max-width:1100px){ .package-orbit-component{width:min(100%,1000px)} .wheel-center-title{font-size:38px} .wheel-node-label{font-size:22px} .wheel-callout-text{font-size:12px} }
+@media (max-width:860px){ .package-orbit-component{width:min(100%,820px)} .wheel-center-title{font-size:34px} .wheel-center-subtitle{font-size:15px} .wheel-node-label{font-size:19px} .wheel-callout-text{font-size:11px} .workflow-section{padding:138px 0 70px;margin-top:-86px;background:transparent} .workflow-surface{left:0;right:0;top:164px;bottom:0;background:#eef3fb} .workflow-wave{left:-3px;top:0;width:calc(100% + 6px);height:164px} .workflow-head{margin-bottom:24px} .workflow-grid{grid-template-columns:1fr;gap:22px;max-width:680px} .workflow-card{min-height:220px;padding:22px 22px 22px} .workflow-card::after{left:22px;right:22px;bottom:44px} .workflow-card-ornament{left:22px;right:22px;bottom:18px} .workflow-number{margin-bottom:14px;font-size:20px} .workflow-accent{margin-bottom:16px} .workflow-copy{font-size:14px;line-height:1.18} }
+</style>
+
+</head>
+<body>
+  <header class="header-shell">
+    <div class="wrap header">
+      <a class="brand" href="#" aria-label="VŠ efektivně domů">
+        <img src="./assets/logo.png" alt="VŠ efektivně">
+      </a>
+      <nav class="nav" aria-label="Hlavní navigace">
+        <a href="#">O autorovi</a>
+        <a href="#">Kontakt</a>
+        <a href="#">Balíčky</a>
+        <a href="#">Články</a>
+        <a href="#">Obchodní podmínky</a>
+      </nav>
+      <div class="header-cta">
+        <a class="header-btn primary" href="#"><span>Prozkoumat balíčky</span><span aria-hidden="true">›</span></a>
+        <a class="header-btn" href="#"><span>Prozkoumat články</span><span aria-hidden="true">›</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="copy">
+          <div class="badge">✧ Praktické balíčky pro vysokoškoláky</div>
+
+          <h1 class="heading">Dopište závěrečnou práci <span class="gradient">bez nervů.</span> S&nbsp;člověkem, kterému jich prošla rukama tisícovka.</h1>
+
+          <p class="lead">Získejte praktické materiály, metodickou oporu a kontrolní postupy od akademika, který ví, co vedoucí a komise skutečně hodnotí. Ne obecné rady z internetu, ale strukturu, kterou můžete použít hned.</p>
+
+          <div class="chips" aria-label="Oblasti podpory">
+            <span class="chip"><i aria-hidden="true"><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="3.2"></circle><circle cx="6" cy="6" r="1.15"></circle><path d="M7.9 4.1l2.1-2.1"></path><path d="M8.1 2H10v1.9"></path></svg></i>Cíle práce</span>
+            <span class="chip"><i aria-hidden="true"><svg viewBox="0 0 12 12" aria-hidden="true"><rect x="1.2" y="6.4" width="2" height="4.1" rx=".7"></rect><rect x="5" y="3.6" width="2" height="6.9" rx=".7"></rect><rect x="8.8" y="1.4" width="2" height="9.1" rx=".7"></rect></svg></i>Metodika</span>
+            <span class="chip"><i aria-hidden="true"><svg viewBox="0 0 12 12" aria-hidden="true"><ellipse cx="6" cy="2.6" rx="3.3" ry="1.6"></ellipse><path d="M2.7 2.6v2.5c0 .9 1.5 1.6 3.3 1.6s3.3-.7 3.3-1.6V2.6"></path><path d="M2.7 5.1v2.3c0 .9 1.5 1.6 3.3 1.6s3.3-.7 3.3-1.6V5.1"></path></svg></i>Sběr dat</span>
+            <span class="chip"><i aria-hidden="true"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.2v2"></path><path d="M6 8.8v2"></path><path d="M1.2 6h2"></path><path d="M8.8 6h2"></path><path d="M2.5 2.5l1.4 1.4"></path><path d="M8.1 8.1l1.4 1.4"></path><path d="M9.5 2.5L8.1 3.9"></path><path d="M3.9 8.1L2.5 9.5"></path><circle cx="6" cy="6" r="1.8"></circle></svg></i>Práce s AI</span>
+            <span class="chip"><i aria-hidden="true"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 9.8V5.2"></path><path d="M5 9.8V2.6"></path><path d="M8 9.8V6.2"></path><path d="M1.6 9.8h8.8"></path><path d="M2 5.2l3-2.6 3 3.6 2.4-2"></path></svg></i>Analytická část</span>
+            <span class="break" aria-hidden="true"></span>
+            <span class="chip"><i aria-hidden="true"><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="5.2" cy="5.2" r="3.1"></circle><path d="M7.5 7.5L10.2 10.2"></path></svg></i>Rešerše</span>
+            <span class="chip"><i aria-hidden="true"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 9.8h8"></path><path d="M3 8.2V5.5"></path><path d="M6 8.2V3.4"></path><path d="M9 8.2V6.4"></path><circle cx="3" cy="4.2" r=".9"></circle><circle cx="6" cy="2.2" r=".9"></circle><circle cx="9" cy="5.2" r=".9"></circle></svg></i>Výzkumné metody</span>
+            <span class="chip"><i aria-hidden="true"><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="3.8"></circle><path d="M6 6V3.2"></path><path d="M6 6l2.2 1.2"></path></svg></i>Obhajoba</span>
+          </div>
+
+          <div class="cta-row">
+            <a class="hero-btn" href="#"><span>Prozkoumat balíčky</span><span aria-hidden="true">›</span></a>
+          </div>
+
+          <div class="proofbar">
+            <div class="proof"><span class="proof-ico">✦</span><span><b>Hackněte komisi</b><small>Vězte, co oni.</small></span></div>
+            <div class="proof"><span class="proof-ico">✓</span><span><b>Kopíruj a vlož</b><small>Šablony a AI prompty.</small></span></div>
+            <div class="proof"><span class="proof-ico">◷</span><span><b>Hotovo 20x rychleji</b><small>A volné víkendy.</small></span></div>
+            <div class="proof"><span class="proof-ico">↻</span><span><b>Sbohem, knihovno</b><small>Stačí vám jen balíčky.</small></span></div>
+          </div>
+        </div>
+
+        <div class="visual-col">
+          <div class="soft-visual">
+            <div class="soft-frame">
+              <img class="soft-image" src="./assets/hero.png" alt="Student pracující na závěrečné práci">
+            </div>
+
+            <div class="soft-proofbar" aria-label="Hlavní přínosy">
+              <div class="soft-proof-item">
+                <span class="soft-proof-icon">⌁</span>
+                <span class="soft-proof-copy"><strong>Bez přípravy</strong><span>Otevřeš a jedeš</span></span>
+              </div>
+              <span class="soft-proof-divider" aria-hidden="true"></span>
+              <div class="soft-proof-item">
+                <span class="soft-proof-icon">▣</span>
+                <span class="soft-proof-copy"><strong>Bez studování</strong><span>Zapomeň na knížky</span></span>
+              </div>
+              <span class="soft-proof-divider" aria-hidden="true"></span>
+              <div class="soft-proof-item">
+                <span class="soft-proof-icon">◷</span>
+                <span class="soft-proof-copy"><strong>Bez stresu</strong><span>Je to jako PC hra😊</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="packages-divider" aria-hidden="true"></div>
+
+    <section class="packages-section" aria-labelledby="packages-title">
+      <div class="packages-decor" aria-hidden="true"></div>
+      <div class="packages-wave-system" aria-hidden="true">
+        <div class="packages-wave-left packages-wave-soft">
+          <svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M-30 170 C 70 155, 118 115, 176 108 S 294 122, 380 96 S 468 46, 548 20" stroke="rgba(255,255,255,0.52)" stroke-width="5" />
+            <path d="M-20 182 C 82 168, 136 132, 210 132 S 302 148, 376 126 S 454 72, 540 42" stroke="rgba(108,122,255,0.15)" stroke-width="2.25" />
+            <path d="M-30 300 C 92 270, 220 288, 316 306 S 470 336, 580 300" stroke="rgba(121,135,255,0.13)" stroke-width="2.6" />
+          </svg>
+        </div>
+
+        <div class="packages-wave-right packages-wave-soft">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M132 266 C 186 206, 256 176, 314 132 S 402 54, 486 -4" stroke="rgba(126,138,255,0.18)" stroke-width="2.8" />
+            <path d="M80 248 C 160 188, 236 156, 298 118 S 390 48, 472 8" stroke="rgba(255,255,255,0.46)" stroke-width="4.2" />
+            <path d="M40 228 C 126 182, 198 154, 258 128 S 348 72, 430 26" stroke="rgba(126,138,255,0.09)" stroke-width="1.8" />
+          </svg>
+        </div>
+
+        <div class="packages-wave-bottom packages-wave-soft">
+          <svg viewBox="0 0 760 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M-20 126 C 112 110, 250 112, 372 126 S 614 150, 784 118" stroke="rgba(255,255,255,0.34)" stroke-width="4" />
+            <path d="M-10 132 C 126 116, 250 118, 374 132 S 610 154, 780 126" stroke="rgba(118,132,255,0.09)" stroke-width="2" />
+          </svg>
+        </div>
+      </div>
+      <div class="packages-orb-cutout-wrap" aria-hidden="true"><img class="packages-orb-cutout" src="./assets/packages-orb.png" alt=""></div>
+      <div class="packages-css-orb-scene" aria-hidden="true"><span class="css-orb"></span><span class="css-platform"></span></div>
+      <div class="packages-smoothwash" aria-hidden="true"></div>
+      <div class="packages-noise" aria-hidden="true"></div>
+
+      <div class="wrap">
+        <div class="packages-head">
+          <div class="badge packages-badge">⌘ Praktické balíčky pro závěrečné práce</div>
+          <h2 id="packages-title" class="packages-title">Balíčky, které pomohou překonat <span class="gradient">strach ze psaní</span> a přinést jistotu</h2>
+          <p class="packages-lead">Postupy a nástroje, které vznikly s důrazem na jednoduchost a praxi.<br>Pomohou vám zorientovat se v každé fázi práce, ušetřit čas a mít kontrolu.<br>Od prvního kroku až po obhajobu – bez chaosu, bez stresu.</p>
+          <a class="packages-cta" href="#"><span>Prohlédnout balíčky</span><span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="packages-pills" aria-label="Navigace v sekci balíčků">
+          <span class="packages-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.2 10 3l7 6.2"></path><path d="M5.2 8.8v8.2h9.6V8.8"></path></svg>Úvod</span>
+          <span class="packages-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.6 4.5h4.9a2 2 0 0 1 2 2v9H6.6a2 2 0 0 0-2 2Z"></path><path d="M15.4 4.5h-4.9a2 2 0 0 0-2 2v9h4.9a2 2 0 0 1 2 2Z"></path></svg>Teorie</span>
+          <span class="packages-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.4" cy="8.4" r="4.8"></circle><path d="m12 12 4.2 4.2"></path></svg>Metodika</span>
+          <span class="packages-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9.2"></path><path d="M8.3 16V6.3"></path><path d="M12.6 16V3.8"></path><path d="M16 16V11"></path></svg>Praktická</span>
+          <span class="packages-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16s-5.5-3-5.5-8.3V4.7L10 3l5.5 1.7v3c0 5.3-5.5 8.3-5.5 8.3Z"></path></svg>Diskuse</span>
+          <span class="packages-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 14V6"></path><path d="m6.8 9.2 3.2-3.2 3.2 3.2"></path><path d="M4 16h12"></path></svg>Závěr</span>
+          <span class="packages-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.4v3.1"></path><path d="M10 13.5v3.1"></path><path d="M3.4 10h3.1"></path><path d="M13.5 10h3.1"></path><path d="m5.3 5.3 2.2 2.2"></path><path d="m12.5 12.5 2.2 2.2"></path><path d="m14.7 5.3-2.2 2.2"></path><path d="m7.5 12.5-2.2 2.2"></path></svg>AI nástroje</span>
+          <span class="packages-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9.8"></path><path d="M8.3 16V6.6"></path><path d="M12.6 16V11.2"></path><path d="M16 16V4.2"></path></svg>Statistika</span>
+        </div>
+
+        <div class="packages-cards">
+          <article class="package-card">
+            <div class="package-kicker">Úvod</div>
+            <h3>A jak teda začnu?</h3>
+            <p>Otevřeš práci, otevřeš balíček a pracuješ. Nic na tom není :D</p>
+            <div class="package-illustration"><img src="./assets/pkg-1.png" alt="Ilustrace úvodu"></div>
+          </article>
+
+          <article class="package-card">
+            <div class="package-kicker">Teorie</div>
+            <h3>Kolik mi to zabere času?</h3>
+            <p>Záleží na balíčku. U některých skoro žádný, u některých třetinu času co bez balíčku.</p>
+            <div class="package-illustration"><img src="./assets/pkg-2.png" alt="Ilustrace času"></div>
+          </article>
+
+          <article class="package-card">
+            <div class="package-kicker">Metodika</div>
+            <h3>Podvádím nebo ne?</h3>
+            <p>Nejde o podvod. Jde o zjednodušení práce a vyřazení zbytečných kroků.</p>
+            <div class="package-illustration"><img src="./assets/pkg-3.png" alt="Ilustrace metodiky"></div>
+          </article>
+
+          <article class="package-card">
+            <div class="package-kicker">Praktická</div>
+            <h3>Nevím, co chci v práci mít</h3>
+            <p>I tohle balíčky řeší. Dostanete možnosti a vyberete.</p>
+            <div class="package-illustration"><img src="./assets/pkg-4.png" alt="Ilustrace praktické části"></div>
+          </article>
+
+          <article class="package-card">
+            <div class="package-kicker">Diskuse</div>
+            <h3>A není to práce navíc?</h3>
+            <p>Ne. Celkový čas práce na BP/DP zredukujete tak na 10 %.</p>
+            <div class="package-illustration"><img src="./assets/pkg-5.png" alt="Ilustrace diskuse"></div>
+          </article>
+
+          <article class="package-card">
+            <div class="package-kicker">AI nástroje</div>
+            <h3>Nevěřím AI a neumím s ní</h3>
+            <p>Nevěřte jí proto, že s ní neumíte. Profík ví, jak AI kontrolovat. Dozvíte se jak na to.</p>
+            <div class="package-illustration"><img src="./assets/pkg-6.png" alt="Ilustrace AI nástrojů"></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    
+    
+    
+    
+    <section class="benefits-section" aria-labelledby="benefits-title">
+      <div class="wrap benefits-shell">
+        <div class="benefits-top-visual">
+          <img src="./assets/methodik-cutout-v194.png" alt="Metodik s balíčky Metodika, Práce s AI a Dotazníky">
+        </div>
+        <h2 id="benefits-title" class="benefits-title">A co je to vlastně ten balíček?</h2>
+        <p class="benefits-intro">Jedná se o textově-obrázková pdf, která vždy řeší nějakou část práce od začátku až do konce (teorie, metodika, praktická, …) anebo práci s umělou inteligencí v bp/dp či statistiku. Vše se uvádí chronologicky od začátku dané části až do jejího konce, a to právě za pomoci tipů, triků, návodů, příkladů, promptů a metod.</p>
+
+        <div class="package-orbit-component" aria-label="Vizuální diagram obsahu balíčků"><svg class="premium-wheel-svg" viewBox="0 0 1300 760" role="img" aria-labelledby="wheelTitle wheelDesc" xmlns="http://www.w3.org/2000/svg"><title id="wheelTitle">Balíčky a jejich součásti</title><desc id="wheelDesc">Prémiový kruhový diagram se šesti vnějšími prvky, šipkami do středu a vysvětlujícími popisky.</desc><defs>
+<linearGradient id="bgPanel" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#eef3fb"/><stop offset="48%" stop-color="#e6edf8"/><stop offset="100%" stop-color="#dde6f5"/></linearGradient>
+<radialGradient id="ambientGlow" cx="50%" cy="48%" r="56%"><stop offset="0%" stop-color="rgba(255,255,255,.96)"/><stop offset="62%" stop-color="rgba(212,225,252,.22)"/><stop offset="100%" stop-color="rgba(212,225,252,0)"/></radialGradient>
+<linearGradient id="ringMain" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#8e81ff"/><stop offset="22%" stop-color="#57c6d6"/><stop offset="46%" stop-color="#6c79ff"/><stop offset="70%" stop-color="#56c4d9"/><stop offset="100%" stop-color="#9f7cff"/></linearGradient>
+<linearGradient id="ringGlass" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(255,255,255,.95)"/><stop offset="100%" stop-color="rgba(255,255,255,.2)"/></linearGradient>
+<linearGradient id="tipy" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#cab8ff"/><stop offset="100%" stop-color="#726cf1"/></linearGradient>
+<linearGradient id="triky" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a6c3ff"/><stop offset="100%" stop-color="#5f7af4"/></linearGradient>
+<linearGradient id="metody" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a2def8"/><stop offset="100%" stop-color="#6390e8"/></linearGradient>
+<linearGradient id="navody" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9ce6ea"/><stop offset="100%" stop-color="#55a8da"/></linearGradient>
+<linearGradient id="prompty" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bea9ff"/><stop offset="100%" stop-color="#7b67ec"/></linearGradient>
+<linearGradient id="priklady" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d8b7ef"/><stop offset="100%" stop-color="#a17adc"/></linearGradient>
+<radialGradient id="nodeGloss" cx="34%" cy="26%" r="74%"><stop offset="0%" stop-color="rgba(255,255,255,.86)"/><stop offset="46%" stop-color="rgba(255,255,255,.16)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+<radialGradient id="centerFill" cx="50%" cy="34%" r="72%"><stop offset="0%" stop-color="#ffffff"/><stop offset="64%" stop-color="#f5f8ff"/><stop offset="100%" stop-color="#e8eef8"/></radialGradient>
+<filter id="shadowPanel" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="22" stdDeviation="30" flood-color="#7c8cc2" flood-opacity=".14"/></filter>
+<filter id="shadowNode" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#8292c6" flood-opacity=".18"/></filter>
+<filter id="glowNode" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#ffffff" flood-opacity=".24"/></filter>
+<filter id="glowRing" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#84b2ff" flood-opacity=".16"/></filter>
+<filter id="glowArrow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="0" stdDeviation="1.4" flood-color="#8698cb" flood-opacity=".25"/></filter>
+
+</defs><circle class="wheel-ambient" cx="650" cy="380" r="286" /><circle class="wheel-ring-base" cx="650" cy="380" r="215" /><circle class="wheel-ring-color" cx="650" cy="380" r="215" /><circle class="wheel-ring-highlight" cx="650" cy="380" r="215" /><circle class="wheel-inner-guide" cx="650" cy="380" r="171" /><circle class="wheel-center-disc" cx="650" cy="380" r="112" /><ellipse class="wheel-center-shine" cx="612" cy="334" rx="62" ry="38" /><circle class="wheel-center-ring" cx="650" cy="380" r="94" /><text class="wheel-center-title" x="650" y="370" text-anchor="middle">BALÍČKY</text><text class="wheel-center-subtitle" x="650" y="404" text-anchor="middle">SOUČÁSTI</text><g transform="translate(650.00 160.00)"><circle class="wheel-node-ring" r="72" /><circle class="wheel-node-body" r="61" fill="url(#tipy)" /><circle class="wheel-node-shine" r="61" /><text class="wheel-node-label" x="0" y="2" text-anchor="middle">Tipy</text></g><g transform="translate(840.53 270.00)"><circle class="wheel-node-ring" r="72" /><circle class="wheel-node-body" r="61" fill="url(#triky)" /><circle class="wheel-node-shine" r="61" /><text class="wheel-node-label" x="0" y="2" text-anchor="middle">Triky</text></g><g transform="translate(840.53 490.00)"><circle class="wheel-node-ring" r="72" /><circle class="wheel-node-body" r="61" fill="url(#metody)" /><circle class="wheel-node-shine" r="61" /><text class="wheel-node-label" x="0" y="2" text-anchor="middle">Metody</text></g><g transform="translate(650.00 600.00)"><circle class="wheel-node-ring" r="72" /><circle class="wheel-node-body" r="61" fill="url(#navody)" /><circle class="wheel-node-shine" r="61" /><text class="wheel-node-label" x="0" y="2" text-anchor="middle">Návody</text></g><g transform="translate(459.47 270.00)"><circle class="wheel-node-ring" r="72" /><circle class="wheel-node-body" r="61" fill="url(#priklady)" /><circle class="wheel-node-shine" r="61" /><text class="wheel-node-label" x="0" y="2" text-anchor="middle">Příklady</text></g><g transform="translate(459.47 490.00)"><circle class="wheel-node-ring" r="72" /><circle class="wheel-node-body" r="61" fill="url(#prompty)" /><circle class="wheel-node-shine" r="61" /><text class="wheel-node-label" x="0" y="2" text-anchor="middle">Prompty</text></g><g class="wheel-arrow-layer"><path class="wheel-arrow-fill" d="M 648.80 232.00 L 648.80 260.00 L 647.20 260.00 L 650.00 268.00 L 652.80 260.00 L 651.20 260.00 L 651.20 232.00 Z" /><path class="wheel-arrow-fill" d="M 777.58 304.96 L 753.32 318.96 L 752.52 317.58 L 747.00 324.00 L 755.32 322.43 L 754.52 321.04 L 778.78 307.04 Z" /><path class="wheel-arrow-fill" d="M 778.78 452.96 L 754.52 438.96 L 755.32 437.57 L 747.00 436.00 L 752.52 442.42 L 753.32 441.04 L 777.58 455.04 Z" /><path class="wheel-arrow-fill" d="M 651.20 528.00 L 651.20 500.00 L 652.80 500.00 L 650.00 492.00 L 647.20 500.00 L 648.80 500.00 L 648.80 528.00 Z" /><path class="wheel-arrow-fill" d="M 521.22 307.04 L 545.48 321.04 L 544.68 322.43 L 553.00 324.00 L 547.48 317.58 L 546.68 318.96 L 522.42 304.96 Z" /><path class="wheel-arrow-fill" d="M 522.42 455.04 L 546.68 441.04 L 547.48 442.42 L 553.00 436.00 L 544.68 437.57 L 545.48 438.96 L 521.22 452.96 Z" /></g><g><path class="wheel-callout-line" d="M 720.6 120.4 L 754.6 120.4 L 912.0 68.0" /><circle class="wheel-callout-dot" cx="920" cy="69" r="3.6" /><text class="wheel-callout-text" x="930" y="72" text-anchor="start"><tspan x="930" dy="0">Co dávat, co nedávat,</tspan><tspan x="930" dy="16">na co si dát pozor</tspan><tspan x="930" dy="16">a o co se naopak opřít</tspan></text></g><g><path class="wheel-callout-line" d="M 911.1 230.4 L 945.1 230.4 L 972.0 202.0" /><circle class="wheel-callout-dot" cx="980" cy="203" r="3.6" /><text class="wheel-callout-text" x="990" y="206" text-anchor="start"><tspan x="990" dy="0">Jak změnit nudné psaní</tspan><tspan x="990" dy="16">práce v rychlý a zábavný</tspan><tspan x="990" dy="16">proces :)</tspan></text></g><g><path class="wheel-callout-line" d="M 911.1 529.6 L 945.1 529.6 L 962.0 496.0" /><circle class="wheel-callout-dot" cx="970" cy="497" r="3.6" /><text class="wheel-callout-text" x="980" y="500" text-anchor="start"><tspan x="980" dy="0">Vysvětlené použití</tspan><tspan x="980" dy="16">nejčastějších a nejdůležitějších</tspan><tspan x="980" dy="16">metod výzkumu / praktické části</tspan></text></g><g><path class="wheel-callout-line" d="M 720.6 639.6 L 754.6 639.6 L 912.0 648.0" /><circle class="wheel-callout-dot" cx="920" cy="649" r="3.6" /><text class="wheel-callout-text" x="930" y="652" text-anchor="start"><tspan x="930" dy="0">Na každou část práce dostanete</tspan><tspan x="930" dy="16">krok po kroku postup,</tspan><tspan x="930" dy="16">jak ji zpracovávat</tspan></text></g><g><path class="wheel-callout-line" d="M 388.9 230.4 L 354.9 230.4 L 318.0 164.0" /><circle class="wheel-callout-dot" cx="310" cy="165" r="3.6" /><text class="wheel-callout-text" x="300" y="168" text-anchor="end"><tspan x="300" dy="0">Všechno je vysvětlené</tspan><tspan x="300" dy="16">na příkladech ze všech</tspan><tspan x="300" dy="16">možných oborů</tspan></text></g><g><path class="wheel-callout-line" d="M 388.9 529.6 L 354.9 529.6 L 338.0 516.0" /><circle class="wheel-callout-dot" cx="330" cy="517" r="3.6" /><text class="wheel-callout-text" x="320" y="520" text-anchor="end"><tspan x="320" dy="0">Součástí jsou ty nejužitečnější</tspan><tspan x="320" dy="16">zadání pro AI, jak vygenerovat</tspan><tspan x="320" dy="16">naprosto cokoliv</tspan></text></g></svg></div>
+      </div>
+    </section>
+
+
+    <section class="workflow-section" aria-labelledby="workflow-title">
+      <div class="workflow-surface" aria-hidden="true"></div>
+      <div class="workflow-wave" aria-hidden="true">
+        <svg viewBox="0 0 1446 210" preserveAspectRatio="none" role="presentation">
+          <path class="workflow-wave-fill" d="M0,152 C36,146 72,140 110,130 C164,116 226,100 300,88 C392,74 500,68 626,68 C748,68 868,72 974,62 C1072,52 1146,28 1220,15 C1292,3 1364,1 1446,0 L1446,210 L0,210 Z"></path>
+          <path class="workflow-wave-stroke" d="M0,152 C36,146 72,140 110,130 C164,116 226,100 300,88 C392,74 500,68 626,68 C748,68 868,72 974,62 C1072,52 1146,28 1220,15 C1292,3 1364,1 1446,0"></path>
+        </svg>
+      </div>
+      <div class="wrap workflow-shell">
+        <div class="workflow-head">
+          <h2 id="workflow-title" class="workflow-title">Jak s balíčkem pracovat?</h2>
+          <p class="workflow-lead">Čtyři jednoduché kroky. Bez chaosu, bez zbytečného hledání. Prostě čistý a srozumitelný postup.</p>
+        </div>
+
+        <div class="workflow-grid">
+          <article class="workflow-card">
+            <div class="workflow-number">01</div>
+            <div class="workflow-accent" aria-hidden="true"></div>
+            <p class="workflow-copy">Vyberete problematickou část ve vaší práci nebo sekci, kde jste se zasekli.</p>
+            <div class="workflow-card-ornament" aria-hidden="true">
+              <span class="workflow-orbit"></span>
+              <span class="workflow-dots"><span></span><span></span><span></span></span>
+            </div>
+          </article>
+
+          <article class="workflow-card">
+            <div class="workflow-number">02</div>
+            <div class="workflow-accent" aria-hidden="true"></div>
+            <p class="workflow-copy">Vyberete konkrétní balíček, který ji řeší, nebo balíček, jehož je ta problematika součástí. Balíček zahrnuje všechny části práce.</p>
+            <div class="workflow-card-ornament" aria-hidden="true">
+              <span class="workflow-orbit"></span>
+              <span class="workflow-dots"><span></span><span></span><span></span></span>
+            </div>
+          </article>
+
+          <article class="workflow-card">
+            <div class="workflow-number">03</div>
+            <div class="workflow-accent" aria-hidden="true"></div>
+            <p class="workflow-copy">Koupíte jej a obratem je vám balíček zaslán na email v podobě PDF souboru, popřípadě více souborů.</p>
+            <div class="workflow-card-ornament" aria-hidden="true">
+              <span class="workflow-orbit"></span>
+              <span class="workflow-dots"><span></span><span></span><span></span></span>
+            </div>
+          </article>
+
+          <article class="workflow-card">
+            <div class="workflow-number">04</div>
+            <div class="workflow-accent" aria-hidden="true"></div>
+            <p class="workflow-copy">Otevřete jej a nechte se vést návodem napříč celou problematikou od začátku až do konce.</p>
+            <div class="workflow-card-ornament" aria-hidden="true">
+              <span class="workflow-orbit"></span>
+              <span class="workflow-dots"><span></span><span></span><span></span></span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+
+  </main>
+</body>
+</html>

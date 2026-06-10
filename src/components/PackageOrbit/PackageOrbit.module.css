@@ -1,0 +1,121 @@
+.component {
+  width: min(100%, 900px);
+  margin: 0 auto;
+  position: relative;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.ringBase {
+  fill: none;
+  stroke: rgba(255, 255, 255, .62);
+  stroke-width: 76;
+  filter: url(#orbitSoftShadow);
+}
+
+.ringGradient {
+  fill: none;
+  stroke: url(#orbitRingGradient);
+  stroke-width: 62;
+  stroke-linecap: round;
+  opacity: .94;
+}
+
+.ringHairline {
+  fill: none;
+  stroke: rgba(74, 104, 170, .18);
+  stroke-width: 2;
+  stroke-dasharray: 6 16;
+}
+
+.arrow {
+  stroke: rgba(84, 103, 156, .42);
+  stroke-width: 2.4;
+  fill: none;
+  stroke-linecap: round;
+  filter: url(#orbitArrowGlow);
+}
+
+.centerDisc {
+  fill: url(#orbitCenterFill);
+  stroke: rgba(255,255,255,.82);
+  stroke-width: 8;
+  filter: url(#orbitCenterShadow);
+}
+
+.centerRing {
+  fill: none;
+  stroke: rgba(103, 129, 210, .24);
+  stroke-width: 3;
+}
+
+.centerTitle {
+  font: 850 48px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  fill: #081630;
+  letter-spacing: -.035em;
+}
+
+.centerSubtitle {
+  font: 760 23px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  fill: #65728f;
+  letter-spacing: .12em;
+}
+
+.nodeRim {
+  fill: rgba(255,255,255,.88);
+  filter: url(#orbitNodeShadow);
+}
+
+.nodeInner {
+  stroke: rgba(255,255,255,.64);
+  stroke-width: 3;
+}
+
+.nodeGloss {
+  fill: url(#orbitGloss);
+  opacity: .68;
+}
+
+.nodeIcon {
+  fill: none;
+  stroke: rgba(255,255,255,.94);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .96;
+}
+
+.nodeText {
+  font: 800 24px/1 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  fill: #fff;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: rgba(32, 41, 88, .20);
+  stroke-width: 2px;
+}
+
+.nodeAccent {
+  stroke: rgba(255,255,255,.70);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+@media (max-width: 720px) {
+  .component {
+    width: min(100%, 540px);
+  }
+
+  .centerTitle {
+    font-size: 42px;
+  }
+
+  .nodeText {
+    font-size: 25px;
+  }
+}
